@@ -111,7 +111,7 @@ void RedMatrix_getRoomMessages(RedMatrix *self, const char *room_id) {
 }
     MessageResponse *messageResponse = parseMessageResponse(response.response_body);
 
-    // printMessageResponse(messageResponse);
+    printMessageResponse(messageResponse);
     // cJSON *messages = cJSON_GetObjectItem(root, "chunk");
     // for (int i = 0; i < cJSON_GetArraySize(messages); i++) {
     //     cJSON *message = cJSON_GetArrayItem(messages, i);
