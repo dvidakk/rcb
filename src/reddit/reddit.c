@@ -32,7 +32,10 @@ struct curl_slist* create_headers(const char *user_agent, const char *auth_heade
 char* create_auth_header(const char *clientId, const char *clientSecret) {
     char to_encode[1024];
     snprintf(to_encode, sizeof(to_encode), "%s:%s", clientId, clientSecret);
-    return base64_encode(to_encode);
+    char *auth_header = malloc(sizeof(char) * 1024);
+    // Authorization: Basic base64(client_id:client_secret)
+    snprintf(auth_header, 1024, "Authorization: Basic %s", base64_encode(to_encode));
+    return auth_header;
 }
 
 void Reddit_login(Reddit *self) {

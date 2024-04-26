@@ -1,9 +1,11 @@
-#include "http.h"
 #include <cJSON.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <stdio.h>
+
 #include "matrix_client.h"
-#include "models/matrix/messages.h"
+#include "../http.h"
+#include "models/messages.h"
 
 
 LoginResponse* LoginResponse_new(cJSON *access_token, cJSON *home_server, cJSON *user_id, cJSON *device_id, cJSON *storage_version) {
@@ -16,18 +18,23 @@ LoginResponse* LoginResponse_new(cJSON *access_token, cJSON *home_server, cJSON 
     return self;
 }
 
-RedMatrix* RedMatrix_new(const char *redditToken) {
-    RedMatrix *self = malloc(sizeof(RedMatrix));
-    self->base_url = "https://matrix.redditspace.com";
-    self->redditToken = redditToken;
-    self->loginResponse = NULL;
+struct curl_slist* create_matrix_headers() {
     struct curl_slist *headers = NULL;
     headers = curl_slist_append(headers, CONTENT_TYPE);
     headers = curl_slist_append(headers, USER_AGENT);
     headers = curl_slist_append(headers, ORIGIN);
     headers = curl_slist_append(headers, ACCEPT);
     headers = curl_slist_append(headers, CONNECTION);
+    return headers;
+}
 
+RedMatrix* RedMatrix_new(const char *redditToken) {
+    RedMatrix *self = malloc(sizeof(RedMatrix));
+    self->base_url = "https://matrix.redditspace.com";
+    self->redditToken = redditToken;
+    self->loginResponse = NULL;
+    
+    struct curl_slist *headers = create_matrix_headers();
     self->http_client = HttpClient_new(self->base_url, headers);
     return self;
 }
@@ -62,6 +69,7 @@ LoginResponse* RedMatrix_login(RedMatrix *self) {
     cJSON_Delete(root);
     return loginResponse;
 }
+
 void RedMatrix_getJoinedRooms(RedMatrix *self) {
     HttpClientResult response = HttpClient_get(self->http_client, "/_matrix/client/v3/joined_rooms");
     if (!response.success) {

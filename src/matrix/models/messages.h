@@ -72,6 +72,7 @@ typedef struct MessageChunk {
     ChunkUnsigned *unsigned_chunk;
 } MessageChunk;
 
+
 typedef struct {
     MessageChunk **chunk;
 } MessageState;
@@ -92,7 +93,7 @@ ChunkContent *parseChunkContent(cJSON *content);
 Thread *parseThread(cJSON *thread);
 Relations *parseRelations(cJSON *relations);
 ChunkUnsigned *parseChunkUnsigned(cJSON *unsigned_chunk);
-MessageChunk *parseMessageChunk(cJSON *message);
+MessageChunk **parseMessageChunk(cJSON *message);
 MessageState *parseMessageState(cJSON *state);
 MessageResponse *parseMessageResponse(char *response_body);
 void printMessageResponse(MessageResponse *messageResponse);

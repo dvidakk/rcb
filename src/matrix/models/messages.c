@@ -14,10 +14,14 @@
 
 ChunkContentInfo *parseChunkContentInfo(cJSON *info) {
     ChunkContentInfo *chunkContentInfo = malloc(sizeof(ChunkContentInfo));
-    chunkContentInfo->h = cJSON_GetObjectItem(info, "h")->valueint;
-    chunkContentInfo->mimetype = cJSON_GetObjectItem(info, "mimetype")->valuestring;
-    chunkContentInfo->size = cJSON_GetObjectItem(info, "size")->valueint;
-    chunkContentInfo->w = cJSON_GetObjectItem(info, "w")->valueint;
+    cJSON *h = cJSON_GetObjectItem(info, "h");
+    chunkContentInfo->h = h ? h->valueint : 0;
+    cJSON *mimetype = cJSON_GetObjectItem(info, "mimetype");
+    chunkContentInfo->mimetype = mimetype ? mimetype->valuestring : NULL;
+    cJSON *size = cJSON_GetObjectItem(info, "size");
+    chunkContentInfo->size = size ? size->valueint : 0;
+    cJSON *w = cJSON_GetObjectItem(info, "w");
+    chunkContentInfo->w = w ? w->valueint : 0;
     return chunkContentInfo;
 }
 
@@ -77,9 +81,9 @@ ChunkUnsigned *parseChunkUnsigned(cJSON *unsigned_chunk) {
     return chunkUnsigned;
 }
 
-MessageChunk* parseMessageChunk(cJSON* messages) {
+MessageChunk** parseMessageChunk(cJSON* messages) {
     int size = cJSON_GetArraySize(messages);
-    MessageChunk* messageChunks = malloc(size * sizeof(MessageChunk));
+    MessageChunk** messageChunks = malloc(size * sizeof(MessageChunk));
 
     for (int i = 0; i < size; i++) {
         cJSON* message = cJSON_GetArrayItem(messages, i);
@@ -110,6 +114,8 @@ MessageChunk* parseMessageChunk(cJSON* messages) {
 
         cJSON *unsigned_chunk = cJSON_GetObjectItem(message, "unsigned");
         messageChunk->unsigned_chunk = unsigned_chunk ? parseChunkUnsigned(unsigned_chunk) : NULL;
+
+        messageChunks[i] = messageChunk;
     }
 
     return messageChunks;
@@ -137,9 +143,9 @@ MessageResponse *parseMessageResponse(char *response_body) {
     return messageResponse;
 }
 
-Thread *parseThread(cJSON *thread) {
+Thread *parseThread(cJSON *threadJson) {
     Thread *thread = malloc(sizeof(Thread));
-    cJSON *com_reddit_thread_heroes_user_ids = cJSON_GetObjectItem(thread, "com.reddit.thread.heroes_user_ids");
+    cJSON *com_reddit_thread_heroes_user_ids = cJSON_GetObjectItem(threadJson, "com.reddit.thread.heroes_user_ids");
     int size = cJSON_GetArraySize(com_reddit_thread_heroes_user_ids);
     thread->com_reddit_thread_heroes_user_ids = malloc(size * sizeof(char *));
     for (int i = 0; i < size; i++) {
@@ -147,9 +153,9 @@ Thread *parseThread(cJSON *thread) {
         thread->com_reddit_thread_heroes_user_ids[i] = user_id->valuestring;
     }
     thread->count = size;
-    cJSON *current_user_participated = cJSON_GetObjectItem(thread, "current_user_participated");
+    cJSON *current_user_participated = cJSON_GetObjectItem(threadJson, "current_user_participated");
     thread->current_user_participated = current_user_participated ? current_user_participated->valueint : 0;
-    cJSON *latest_event = cJSON_GetObjectItem(thread, "latest_event");
+    cJSON *latest_event = cJSON_GetObjectItem(threadJson, "latest_event");
     thread->latest_event = latest_event ? parseMessageChunk(latest_event) : NULL;
     return thread;
 }

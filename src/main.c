@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "matrix_client.h"
+#include "matrix/matrix_client.h"
 #include "reddit/reddit.h"
 #include "ini_utils.h"
 

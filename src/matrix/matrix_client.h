@@ -7,8 +7,8 @@
 #define ACCEPT "Accept: application/json"
 #define CONNECTION "Connection: keep-alive"
 
-#include "http.h"
 #include <cJSON.h>
+#include "../http.h"
 
 typedef struct {
     char *access_token;
