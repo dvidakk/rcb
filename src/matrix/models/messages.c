@@ -55,6 +55,9 @@ ChunkContent *parseChunkContent(cJSON *content) {
     cJSON *url = cJSON_GetObjectItem(content, "url");
     chunkContent->url = url ? url->valuestring : NULL;
 
+    cJSON *relates_to = cJSON_GetObjectItem(content, "m.relates_to");
+    chunkContent->relates_to = relates_to ? parseContentRelatesTo(relates_to) : NULL;
+
     return chunkContent;
 }
 ChunkUnsigned *parseChunkUnsigned(cJSON *unsigned_chunk) {
@@ -78,6 +81,11 @@ ChunkUnsigned *parseChunkUnsigned(cJSON *unsigned_chunk) {
     cJSON *replaces_state = cJSON_GetObjectItem(unsigned_chunk, "replaces_state");
     chunkUnsigned->replaces_state = replaces_state ? replaces_state->valuestring : NULL;
 
+    cJSON *relations = cJSON_GetObjectItem(unsigned_chunk, "m.relations");
+    chunkUnsigned->relations = relations ? parseRelations(relations) : NULL;
+
+    cJSON *com_reddit_is_moderator = cJSON_GetObjectItem(unsigned_chunk, "com.reddit.is_moderator");
+    chunkUnsigned->com_reddit_is_moderator = com_reddit_is_moderator ? com_reddit_is_moderator->valueint : 0;
     return chunkUnsigned;
 }
 struct MessageChunk* parseSingleChunk(cJSON* message) {
@@ -108,6 +116,7 @@ struct MessageChunk* parseSingleChunk(cJSON* message) {
     cJSON *unsigned_chunk = cJSON_GetObjectItem(message, "unsigned");
     messageChunk->unsigned_chunk = unsigned_chunk ? parseChunkUnsigned(unsigned_chunk) : NULL;
 
+    
     return messageChunk;
 }
 
@@ -151,7 +160,7 @@ MessageResponse *parseMessageResponse(char *response_body) {
 
 Thread *parseThread(cJSON *threadJson) {
     Thread *thread = malloc(sizeof(Thread));
-    cJSON *com_reddit_thread_heroes_user_ids = cJSON_GetObjectItem(threadJson, "com.reddit.thread.heroes_user_ids");
+    cJSON *com_reddit_thread_heroes_user_ids = cJSON_GetObjectItem(threadJson, "com.reddit.thread_heroes_user_ids");
     int size = cJSON_GetArraySize(com_reddit_thread_heroes_user_ids);
     thread->com_reddit_thread_heroes_user_ids = malloc(size * sizeof(char *));
     for (int i = 0; i < size; i++) {
@@ -162,9 +171,39 @@ Thread *parseThread(cJSON *threadJson) {
     cJSON *current_user_participated = cJSON_GetObjectItem(threadJson, "current_user_participated");
     thread->current_user_participated = current_user_participated ? current_user_participated->valueint : 0;
     cJSON *latest_event = cJSON_GetObjectItem(threadJson, "latest_event");
-    thread->latest_event = latest_event ? parseMessageChunk(latest_event) : NULL;
+    thread->latest_event = latest_event ? parseSingleChunk(latest_event) : NULL;
     return thread;
 }
+
+Relations *parseRelations(cJSON *relationsJson) {
+    Relations *relations = malloc(sizeof(Relations));
+    cJSON *thread = cJSON_GetObjectItem(relationsJson, "m.thread");
+    relations->thread = thread ? parseThread(thread) : NULL;
+    return relations;
+}
+
+RelatesToInReplyTo *parseRelatesToInReplyTo(cJSON *in_reply_to) {
+    RelatesToInReplyTo *relatesToInReplyTo = malloc(sizeof(RelatesToInReplyTo));
+    cJSON *event_id = cJSON_GetObjectItem(in_reply_to, "event_id");
+    relatesToInReplyTo->event_id = event_id ? event_id->valuestring : NULL;
+    return relatesToInReplyTo;
+}
+ContentRelatesTo *parseContentRelatesTo(cJSON *relates_to) {
+    ContentRelatesTo *contentRelatesTo = malloc(sizeof(ContentRelatesTo));
+    cJSON *rel_type = cJSON_GetObjectItem(relates_to, "rel_type");
+    contentRelatesTo->rel_type = rel_type ? rel_type->valuestring : NULL;
+    cJSON *event_id = cJSON_GetObjectItem(relates_to, "event_id");
+    contentRelatesTo->event_id = event_id ? event_id->valuestring : NULL;
+    cJSON *m_in_reply_to = parseRelatesToInReplyTo(cJSON_GetObjectItem(relates_to, "m.in_reply_to"));
+    contentRelatesTo->in_reply_to = m_in_reply_to;
+    cJSON *is_falling_back = cJSON_GetObjectItem(relates_to, "is_falling_back");
+    contentRelatesTo->is_falling_back = is_falling_back ? is_falling_back->valueint : 0;
+    cJSON *key = cJSON_GetObjectItem(relates_to, "key");
+    contentRelatesTo->key = key ? key->valuestring : NULL;
+    return contentRelatesTo;
+}
+
+
 void printChunkContentInfo(ChunkContentInfo *info) {
     if (info) {
         printf("\n[Chunk Content Info]\n");
@@ -172,6 +211,25 @@ void printChunkContentInfo(ChunkContentInfo *info) {
         if (info->mimetype) printf("mimetype: %s\n", info->mimetype);
         printf("size: %d\n", info->size);
         printf("w: %d\n", info->w);
+    }
+}
+
+void printRelatesToInReplyTo(RelatesToInReplyTo *in_reply_to) {
+    if (in_reply_to) {
+        printf("\n[Relates To In Reply To]\n");
+        if (in_reply_to->event_id) printf("event_id: %s\n", in_reply_to->event_id);
+    }
+}
+void printContentRelatesTo(ContentRelatesTo *relates_to) {
+    if (relates_to) {
+        printf("\n[Content Relates To]\n");
+        if (relates_to->event_id) printf("event_id: %s\n", relates_to->event_id);
+        printf("is_falling_back: %s\n", relates_to->is_falling_back ? "true" : "false");
+        if (relates_to->in_reply_to) {
+            printf("in_reply_to:\n");
+            printRelatesToInReplyTo(relates_to->in_reply_to);
+        }
+        if (relates_to->rel_type) printf("rel_type: %s\n", relates_to->rel_type);
     }
 }
 
@@ -190,9 +248,40 @@ void printChunkContent(ChunkContent *content) {
             printChunkContentInfo(content->info);
         }
         if (content->url) printf("url: %s\n", content->url);
+        if (content->relates_to) {
+            printf("relates_to:\n");
+            printContentRelatesTo(content->relates_to);
+        }
     }
 }
 
+void printRelations(Relations *relations) {
+    if (relations) {
+        printf("\n[Relations]\n");
+        if (relations->thread) {
+            printf("thread:\n");
+            printThread(relations->thread);
+        }
+    }
+}
+
+void printThread(Thread *thread) {
+    if (thread) {
+        printf("\n[Thread]\n");
+        if (thread->com_reddit_thread_heroes_user_ids) {
+            printf("com_reddit_thread_heroes_user_ids:\n");
+            for (int i = 0; i < thread->count; i++) {
+                printf("\t%s\n", thread->com_reddit_thread_heroes_user_ids[i]);
+            }
+        }
+        printf("count: %d\n", thread->count);
+        printf("current_user_participated: %s\n", thread->current_user_participated ? "true" : "false");
+        if (thread->latest_event) {
+            printf("latest_event:\n");
+            printMessageChunk(thread->latest_event);
+        }
+    }
+}
 void printChunkUnsigned(ChunkUnsigned *unsigned_chunk) {
     if (unsigned_chunk) {
         printf("\n[Chunk Unsigned]\n");
@@ -205,6 +294,10 @@ void printChunkUnsigned(ChunkUnsigned *unsigned_chunk) {
         if (unsigned_chunk->prev_sender) printf("prev_sender: %s\n", unsigned_chunk->prev_sender);
         printf("prev_stream_pos: %f\n", unsigned_chunk->prev_stream_pos);
         if (unsigned_chunk->replaces_state) printf("replaces_state: %s\n", unsigned_chunk->replaces_state);
+        if (unsigned_chunk->relations) {
+            printf("relations:\n");
+            printRelations(unsigned_chunk->relations);
+        }
     }
 }
 

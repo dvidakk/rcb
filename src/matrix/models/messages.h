@@ -23,7 +23,8 @@ typedef struct {
     char *event_id;
     bool is_falling_back;
     RelatesToInReplyTo *in_reply_to;
-    char *rel_type; 
+    char *rel_type;
+    char *key;
 } ContentRelatesTo;
 
 typedef struct {
@@ -59,6 +60,7 @@ typedef struct {
     char *prev_sender;
     double prev_stream_pos;
     char *replaces_state;
+    bool *com_reddit_is_moderator;
 } ChunkUnsigned;
 
 typedef struct MessageChunk {
