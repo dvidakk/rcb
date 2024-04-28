@@ -27,7 +27,7 @@ char* base64_encode(const char* data) {
         encoded_data[j++] = b64chars[(triple >> 0 * 6) & 0x3F];
     }
 
-    for (int i = 0; i < 3 - input_length % 3; i++) {
+    for (size_t i = 0; i < 3 - input_length % 3; i++) {
         encoded_data[output_length - 1 - i] = '=';
     }
 
