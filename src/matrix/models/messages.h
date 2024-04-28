@@ -35,7 +35,13 @@ typedef struct {
 } Thread;
 
 typedef struct {
+    bool hide;
+
+} RelationsHide;
+
+typedef struct {
     Thread *thread;
+    RelationsHide *hide_user_content;
 } Relations;
 
 // Complex structures
@@ -50,6 +56,7 @@ typedef struct {
     ChunkContentInfo *info;
     char *url;
     ContentRelatesTo *relates_to;
+    char *reason;
 } ChunkContent;
 
 typedef struct {
@@ -79,6 +86,10 @@ typedef struct {
     MessageChunk *chunk;
 } MessageState;
 
+typedef struct {
+    struct MessageChunk** chunks;
+    int size;
+} MessageStateArray;
 
 typedef struct {
     struct MessageChunk** chunks;
@@ -91,7 +102,7 @@ typedef struct {
     char *end;
     MessageChunkArray *chunk;
     char *updates;
-    MessageState *state;
+    MessageChunkArray *state;
 } MessageResponse;
 
 // Function declarations
@@ -102,7 +113,7 @@ Thread *parseThread(cJSON *thread);
 Relations *parseRelations(cJSON *relations);
 ChunkUnsigned *parseChunkUnsigned(cJSON *unsigned_chunk);
 MessageChunkArray *parseMessageChunks(cJSON *message);
-MessageState *parseMessageState(cJSON *state);
+MessageStateArray *parseMessageState(cJSON *state);
 MessageResponse *parseMessageResponse(char *response_body);
 void printMessageResponse(MessageResponse *messageResponse);
 
