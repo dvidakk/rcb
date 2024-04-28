@@ -3,7 +3,6 @@
 #include <string.h>
 #include <stdbool.h>
 
-
 #include "matrix/matrix_client.h"
 #include "reddit/reddit.h"
 #include "ini_utils.h"
@@ -39,44 +38,34 @@ int main() {
     for (int i = 0; i < messages->state->size; i++) {
         MessageChunk *message_chunk = messages->state->chunks[i];
         ChunkContent *content = message_chunk->content;
-        if (strcmp(message_chunk->type, "m.room.member") == 0) {
+        char *displayname = NULL;
+
+        if (strcmp(message_chunk->type, "m.room.member") == 0 && getUserDisplayname(users, 100, message_chunk->sender) == NULL) {
             if(strcmp(content->membership, "join") == 0) {
-                if (getUserDisplayname(users, 100, message_chunk->sender) == NULL) {
-                    insertUser(users, 100, message_chunk->sender, content->displayname);
-                    user_count++;
-                }
+                displayname = content->displayname;
             } else if (strcmp(content->membership, "leave") == 0) {
-                if (getUserDisplayname(users, 100, message_chunk->sender) == NULL) {
-                    // get the displayname from the previous content in the unsigned chunk
-                    char* inster_name = message_chunk->unsigned_chunk->prev_content->displayname;
-                    insertUser(users, 100, message_chunk->sender, inster_name);
-                    user_count++;
-                }
+                // get the displayname from the previous content in the unsigned chunk
+                displayname = message_chunk->unsigned_chunk->prev_content->displayname;
             }
-        } 
+
+            if (displayname != NULL) {
+                insertUser(users, 100, message_chunk->sender, displayname);
+                user_count++;
+            }
+        }
     }
 
 
     for (int i = messages->chunk->size - 1; i >= 0; i--) {
         MessageChunk *message = messages->chunk->chunks[i];
         ChunkContent *content = message->content;
-        if (content->body != NULL) {
-            char* displayname = getUserDisplayname(users, 100, message->sender);
-            if(displayname != NULL) {
-                printf("Message: %s - [%s] %s\n",  content->body, content->msgtype, displayname);
-            } else {
-                printf("Message: %s - [%s] %s\n",  content->body, content->msgtype, message->sender);
-            }
-        } else if (strcmp(message->type, "m.room.member") == 0) {
-            if(strcmp(content->membership, "join") == 0) {
-                printf("Member: %s - [%s]\n", content->displayname, content->membership);
-            } else {
-                char* displayname = getUserDisplayname(users, 100, message->sender);
+        char* displayname = getUserDisplayname(users, 100, message->sender);
 
-                printf("Member: %s - [%s]\n", displayname, content->membership);
-            }
+        if (content->body != NULL) {
+            printf("Message: %s - [%s] %s\n",  content->body, content->msgtype, displayname ? displayname : message->sender);
+        } else if (strcmp(message->type, "m.room.member") == 0) {
+            printf("Member: %s - [%s]\n", strcmp(content->membership, "join") == 0 ? content->displayname : displayname, content->membership);
         } else {
-            char* displayname = getUserDisplayname(users, 100, message->sender);
             printf("Message: [Attachment] - [%s] %s\n", message->type, displayname);
         }
     }
