@@ -9,7 +9,7 @@ find_package(Threads REQUIRED)
 
 # Set the C standard to the newest version
 set(CMAKE_C_STANDARD 23)
-
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic")
 # source files in a src directory
 file(GLOB_RECURSE SOURCES "src/*.c")
 # Add the executable
