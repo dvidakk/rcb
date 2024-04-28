@@ -28,6 +28,7 @@ int main() {
     LoginResponse *response = RedMatrix_login(matrix);
 
     RedMatrix_getRoomMessages(matrix, "!GS8kU7qKTMydi5gBrShQtg:reddit.com");
+    //RedMatrix_getDisplayName(matrix, "@t2_hltcflqh8:reddit.com");
     //RedMatrix_getJoinedRooms(matrix);
 
     Reddit_free(reddit);
