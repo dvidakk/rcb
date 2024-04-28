@@ -89,6 +89,13 @@ ChunkUnsigned *parseChunkUnsigned(cJSON *unsigned_chunk) {
 
     cJSON *com_reddit_is_moderator = cJSON_GetObjectItem(unsigned_chunk, "com.reddit.is_moderator");
     chunkUnsigned->com_reddit_is_moderator = com_reddit_is_moderator ? com_reddit_is_moderator->valueint : 0;
+
+    cJSON *redacted_by = cJSON_GetObjectItem(unsigned_chunk, "redacted_by");
+    chunkUnsigned->redacted_by = redacted_by ? redacted_by->valuestring : NULL;
+
+    cJSON *redacted_because = cJSON_GetObjectItem(unsigned_chunk, "redacted_because");
+    chunkUnsigned->redacted_because = redacted_because ? parseSingleChunk(redacted_because) : NULL;
+
     return chunkUnsigned;
 }
 struct MessageChunk* parseSingleChunk(cJSON* message) {
@@ -119,6 +126,8 @@ struct MessageChunk* parseSingleChunk(cJSON* message) {
     cJSON *unsigned_chunk = cJSON_GetObjectItem(message, "unsigned");
     messageChunk->unsigned_chunk = unsigned_chunk ? parseChunkUnsigned(unsigned_chunk) : NULL;
 
+    cJSON *redacts = cJSON_GetObjectItem(message, "redacts");
+    messageChunk->redacts = redacts ? strdup(redacts->valuestring) : NULL;
     
     return messageChunk;
 }

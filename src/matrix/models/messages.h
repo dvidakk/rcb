@@ -68,6 +68,8 @@ typedef struct {
     double prev_stream_pos;
     char *replaces_state;
     bool *com_reddit_is_moderator;
+    char *redacted_by;
+    struct MessageChunk *redacted_because;
 } ChunkUnsigned;
 
 typedef struct MessageChunk {
@@ -79,6 +81,7 @@ typedef struct MessageChunk {
     char *state_key;
     char *type;
     ChunkUnsigned *unsigned_chunk;
+    char *redacts;
 } MessageChunk;
 
 
@@ -110,6 +113,7 @@ ChunkContentInfo *parseChunkContentInfo(cJSON *info);
 ContentRelatesTo *parseContentRelatesTo(cJSON *relates_to);
 ChunkContent *parseChunkContent(cJSON *content);
 Thread *parseThread(cJSON *thread);
+struct MessageChunk *parseSingleChunk(cJSON *message);
 Relations *parseRelations(cJSON *relations);
 ChunkUnsigned *parseChunkUnsigned(cJSON *unsigned_chunk);
 MessageChunkArray *parseMessageChunks(cJSON *message);
