@@ -20,7 +20,7 @@ typedef struct {
 
 typedef struct {
     char *base_url;
-    char *redditToken;
+    const char *redditToken;
     LoginResponse *loginResponse;
     HttpClient *http_client;
 } RedMatrix;
@@ -39,5 +39,6 @@ void RedMatrix_getJoinedRooms(RedMatrix *self);
 void RedMatrix_getRoomMessages(RedMatrix *self, const char *roomId);
 void RedMatrix_free(RedMatrix *self);
 
+char* RedMatrix_getDisplayName(RedMatrix *self, const char *userId);
 
 #endif // MATRIX_CLIENT_H
