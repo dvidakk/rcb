@@ -55,7 +55,6 @@ int main() {
         }
     }
 
-
     for (int i = messages->chunk->size - 1; i >= 0; i--) {
         MessageChunk *message = messages->chunk->chunks[i];
         ChunkContent *content = message->content;

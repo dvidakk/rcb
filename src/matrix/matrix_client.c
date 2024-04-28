@@ -95,13 +95,13 @@ MessageResponse* RedMatrix_getRoomMessages(RedMatrix *self, const char *room_id)
     HttpClientResult response = HttpClient_get(self->http_client, path);
     if (!response.success) {
         printf("Error: %s\n", response.error_message);
-        return;
+        return NULL;
     }
     cJSON *root = cJSON_Parse(response.response_body);
 
     if (!root) {
         printf("Error before: [%s]\n", cJSON_GetErrorPtr());
-        return;
+        return NULL;
     }
     if (root) {
       char *string = cJSON_Print(root);

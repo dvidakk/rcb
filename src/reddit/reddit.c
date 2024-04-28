@@ -54,26 +54,30 @@ void Reddit_login(Reddit *self) {
     if (!response.success) {
         fprintf(stderr, "Error: %s\n", response.error_message);
         HttpClient_free(http_client);
-        return NULL;
+        return;
     }
+
     cJSON *root = cJSON_Parse(response.response_body);
     if (!root) {
         fprintf(stderr, "Error before: [%s]\n", cJSON_GetErrorPtr());
         HttpClient_free(http_client);
-        return NULL;
+        return;
     }
+
     self->token = malloc(sizeof(RedditToken));
     if (!self->token) {
         fprintf(stderr, "Failed to allocate memory for RedditToken\n");
         cJSON_Delete(root);
         HttpClient_free(http_client);
-        return NULL;
+        return;
     }
+
     cJSON *access_token = cJSON_GetObjectItem(root, "access_token");
     cJSON *refresh_token = cJSON_GetObjectItem(root, "refresh_token");
     cJSON *token_type = cJSON_GetObjectItem(root, "token_type");
     cJSON *expires_in = cJSON_GetObjectItem(root, "expires_in");
     cJSON *scope = cJSON_GetObjectItem(root, "scope");
+
     if (access_token) self->token->access_token = strdup(access_token->valuestring);
     if (refresh_token) self->token->refresh_token = strdup(refresh_token->valuestring);
     if (token_type) self->token->token_type = strdup(token_type->valuestring);
@@ -87,16 +91,22 @@ char* Reddit_getToken(Reddit *self) {
     return self->token->access_token;
 }
 
+void safe_free(void *ptr) {
+    if (ptr) {
+        free(ptr);
+    }
+}
+
 void Reddit_free(Reddit *self) {
-    if (self->clientId) free(self->clientId);
-    if (self->clientSecret) free(self->clientSecret);
-    if (self->username) free(self->username);
-    if (self->password) free(self->password);
+    safe_free(self->clientId);
+    safe_free(self->clientSecret);
+    safe_free(self->username);
+    safe_free(self->password);
     if (self->token) {
-        if (self->token->access_token) free(self->token->access_token);
-        if (self->token->refresh_token) free(self->token->refresh_token);
-        if (self->token->token_type) free(self->token->token_type);
-        if (self->token->scope) free(self->token->scope);
+        safe_free(self->token->access_token);
+        safe_free(self->token->refresh_token);
+        safe_free(self->token->token_type);
+        safe_free(self->token->scope);
         free(self->token);
     }
     free(self);
