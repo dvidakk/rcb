@@ -93,7 +93,7 @@ ChunkUnsigned *parseChunkUnsigned(cJSON *unsigned_chunk) {
 }
 struct MessageChunk* parseSingleChunk(cJSON* message) {
     MessageChunk *messageChunk = malloc(sizeof(MessageChunk));
-    printf("Message: %s\n", cJSON_Print(message));
+    //printf("Message: %s\n", cJSON_Print(message));
 
     cJSON *content = cJSON_GetObjectItem(message, "content");
     messageChunk->content = content ? parseChunkContent(content) : NULL;

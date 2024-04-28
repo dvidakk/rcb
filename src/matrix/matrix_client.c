@@ -89,7 +89,7 @@ void RedMatrix_getJoinedRooms(RedMatrix *self) {
     cJSON_Delete(root);
 }
 
-void RedMatrix_getRoomMessages(RedMatrix *self, const char *room_id) {
+MessageResponse* RedMatrix_getRoomMessages(RedMatrix *self, const char *room_id) {
     char path[256];
     sprintf(path, "/_matrix/client/v3/rooms/%s/messages?dir=b&limit=100&filter=%s", room_id, curl_easy_escape(self->http_client->curl, "{\"lazy_load_members\":true}", 0));
     HttpClientResult response = HttpClient_get(self->http_client, path);
@@ -112,86 +112,8 @@ void RedMatrix_getRoomMessages(RedMatrix *self, const char *room_id) {
     }
     MessageResponse *messageResponse = parseMessageResponse(response.response_body);
 
-    //printMessageResponse(messageResponse);
-    // cJSON *messages = cJSON_GetObjectItem(root, "chunk");
-    // for (int i = 0; i < cJSON_GetArraySize(messages); i++) {
-    //     cJSON *message = cJSON_GetArrayItem(messages, i);
-    //     cJSON *content = cJSON_GetObjectItem(message, "content");
-    //     cJSON *body = cJSON_GetObjectItem(content, "body");
-    //     cJSON *sender = cJSON_GetObjectItem(message, "sender");
-    //     cJSON *displayname = cJSON_GetObjectItem(message, "displayname");
-    //     cJSON  *msgtype = cJSON_GetObjectItem(content, "msgtype");
-    //     if(body != NULL) {
-    //         if(displayname != NULL) {
-    //             printf("Message: %s - [%s] %s\n",  body->valuestring, msgtype->valuestring, displayname->valuestring);
-    //         } else {
-    //             printf("Message: %s - [%s] %s\n",  body->valuestring, msgtype->valuestring, sender->valuestring);
-    //         }
-    //     } else {
-    //         printf("Message: [Attachment]\n");
-    //     }
-    // }
-    //MessageStateArray *chunkArray = messageResponse->state->chunks;
-    typedef struct User {
-        char *user_id;
-        char *displayname;
-        bool added;
-    } User;
-    User *users = malloc(sizeof(User) * 100);
-    int user_count = 0;
-
-
-    for (int i = 0; i < messageResponse->state->size; i++) {
-        MessageChunk *message = messageResponse->state->chunks[i];
-        ChunkContent *content = message->content;
-        if (strcmp(message->type, "m.room.member") == 0) {
-            if(strcmp(content->membership, "join") == 0) {
-                // Check for duplicates
-                bool is_duplicate = false;
-                for (int j = 0; j < user_count; j++) {
-                    if (strcmp(users[j].user_id, message->sender) == 0) {
-                        is_duplicate = true;
-                        break;
-                    }
-                }
-                // If not a duplicate, add to users
-                if (!is_duplicate) {
-                    users[user_count].user_id = message->sender;
-                    users[user_count].displayname = content->displayname;
-                    user_count++;
-                }
-            }
-        }
-    }
-
-    for (int i = messageResponse->chunk->size - 1; i >= 0; i--) {
-        MessageChunk *message = messageResponse->chunk->chunks[i];
-        ChunkContent *content = message->content;
-        if (content->body != NULL) {
-            char* displayname = NULL;
-            for (int j = 0; j < user_count; j++) {
-                if (strcmp(users[j].user_id, message->sender) == 0) {
-                    displayname = users[j].displayname;
-                    break;
-                }
-            }
-            if(displayname != NULL) {
-                printf("Message: %s - [%s] %s\n",  content->body, content->msgtype, displayname);
-            } else {
-                printf("Message: %s - [%s] %s\n",  content->body, content->msgtype, message->sender);
-            }
-        } else if (strcmp(message->type, "m.room.member") == 0) {
-            if(strcmp(content->membership, "join") == 0) {
-                printf("Member: %s - [%s]\n", content->displayname, content->membership);
-            } else {
-                // char* displayname = RedMatrix_getDisplayName(self, message->sender);
-                printf("Member: %s - [%s]\n", message->sender, content->membership);
-            }
-        } else {
-            printf("Message: [Attachment] - [%s] %s\n", message->type, message->sender);
-        }
-    }
     cJSON_Delete(root);
+    return messageResponse;
 }
 
 // get displayname from user_id
@@ -203,8 +125,7 @@ char* RedMatrix_getDisplayName(RedMatrix *self, const char *user_id) {
         printf("Error: %s\n", response.error_message);
         return NULL;
     }
-    // print response
-    //printf("Response: %s\n", response.response_body);
+
     cJSON *root = cJSON_Parse(response.response_body);
     if (!root) {
         printf("Error before: [%s]\n", cJSON_GetErrorPtr());

@@ -9,6 +9,7 @@
 
 #include <cJSON.h>
 #include "../http.h"
+#include "models/messages.h"
 
 typedef struct {
     char *access_token;
@@ -36,7 +37,7 @@ RedMatrix* RedMatrix_new(const char *redditToken);
 
 LoginResponse* RedMatrix_login(RedMatrix *self);
 void RedMatrix_getJoinedRooms(RedMatrix *self);
-void RedMatrix_getRoomMessages(RedMatrix *self, const char *roomId);
+MessageResponse* RedMatrix_getRoomMessages(RedMatrix *self, const char *roomId);
 void RedMatrix_free(RedMatrix *self);
 
 char* RedMatrix_getDisplayName(RedMatrix *self, const char *userId);
