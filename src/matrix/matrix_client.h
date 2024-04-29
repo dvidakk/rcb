@@ -35,11 +35,15 @@ LoginResponse* LoginResponse_new(cJSON *access_token,
 
 RedMatrix* RedMatrix_new(const char *redditToken);
 
-LoginResponse* RedMatrix_login(RedMatrix *self);
+void RedMatrix_login(RedMatrix *self);
+void RedMatrix_joinRoom(RedMatrix *self, const char *roomId);
+void RedMatrix_leaveRoom(RedMatrix *self, const char *roomId);
 void RedMatrix_getJoinedRooms(RedMatrix *self);
 MessageResponse* RedMatrix_getRoomMessages(RedMatrix *self, const char *roomId);
+
 void RedMatrix_free(RedMatrix *self);
 
 char* RedMatrix_getDisplayName(RedMatrix *self, const char *userId);
+void RedMatrix_downloadMxc(RedMatrix *self, const char *mxcUrl, const char *filename);
 
 #endif // MATRIX_CLIENT_H

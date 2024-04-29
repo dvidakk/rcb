@@ -40,19 +40,19 @@ RedMatrix* RedMatrix_new(const char *redditToken) {
     return self;
 }
 
-LoginResponse* RedMatrix_login(RedMatrix *self) {
+void RedMatrix_login(RedMatrix *self) {
     char data[1024];
     sprintf(data, "{\"token\": \"%s\", \"device_id\": \"DO_NOT_TRACK_THIS_DEVICE\", \"initial_device_display_name\": \"Reddit Web Client\", \"type\": \"com.reddit.token\"}", self->redditToken);
 
     HttpClientResult response = HttpClient_post(self->http_client, "/_matrix/client/v3/login", data);
     if (!response.success) {
         printf("Error: %s\n", response.error_message);
-        return NULL;
+        return;
     }
     cJSON *root = cJSON_Parse(response.response_body);
     if (!root) {
         printf("Error before: [%s]\n", cJSON_GetErrorPtr());
-        return NULL;
+        return;
     }
     LoginResponse *loginResponse = LoginResponse_new(cJSON_GetObjectItem(root, "access_token"), 
                                                      cJSON_GetObjectItem(root, "home_server"), 
@@ -67,8 +67,7 @@ LoginResponse* RedMatrix_login(RedMatrix *self) {
     headers = curl_slist_append(headers, bearer);
     HttpClient_set_headers(self->http_client, headers);
 
-    cJSON_Delete(root);
-    return loginResponse;
+    cJSON_Delete(root); 
 }
 
 void RedMatrix_getJoinedRooms(RedMatrix *self) {
@@ -103,13 +102,13 @@ MessageResponse* RedMatrix_getRoomMessages(RedMatrix *self, const char *room_id)
         printf("Error before: [%s]\n", cJSON_GetErrorPtr());
         return NULL;
     }
-    if (root) {
-      char *string = cJSON_Print(root);
-      if (string) {
-          printf("%s\n", string);
-          free(string);
-      }
-    }
+//    if (root) {
+//      char *string = cJSON_Print(root);
+//      if (string) {
+//          printf("%s\n", string);
+//          free(string);
+//     }
+//    }
     MessageResponse *messageResponse = parseMessageResponse(response.response_body);
 
     cJSON_Delete(root);
@@ -135,6 +134,54 @@ char* RedMatrix_getDisplayName(RedMatrix *self, const char *user_id) {
     char *displayname_str = displayname->valuestring;
     cJSON_Delete(root);
     return displayname_str;
+}
+void RedMatrix_joinRoom(RedMatrix *self, const char *room_id) {
+    char path[256];
+    sprintf(path, "/_matrix/client/v3/rooms/%s/join", room_id);
+    HttpClientResult response = HttpClient_post(self->http_client, path, "{}");
+    if (!response.success) {
+        printf("Error: %s\n", response.error_message);
+        return;
+    }
+    cJSON *root = cJSON_Parse(response.response_body);
+    if (!root) {
+        printf("Error before: [%s]\n", cJSON_GetErrorPtr());
+        return;
+    }
+    cJSON_Delete(root);
+}
+
+void RedMatrix_leaveRoom(RedMatrix *self, const char *room_id) {
+    char path[256];
+    sprintf(path, "/_matrix/client/v3/rooms/%s/leave", room_id);
+    HttpClientResult response = HttpClient_post(self->http_client, path, "{}");
+    if (!response.success) {
+        printf("Error: %s\n", response.error_message);
+        return;
+    }
+    printf("Response: %s\n", response.response_body);
+    cJSON *root = cJSON_Parse(response.response_body);
+    if (!root) {
+        printf("Error before: [%s]\n", cJSON_GetErrorPtr());
+        return;
+    }
+    cJSON_Delete(root);
+}
+
+void RedMatrix_downloadMxc(RedMatrix *self, const char *mxc_url, const char *filename) {
+    char path[256];
+    sprintf(path, "/_matrix/media/v3/download/%s", mxc_url);
+    printf("Downloading: %s\n", path);
+    HttpClientResult response = HttpClient_get(self->http_client, path);
+    if (!response.success) {
+        printf("Error: %s\n", response.error_message);
+        return;
+    }
+    FILE *file = fopen(filename, "wb");
+    if (file) {
+        fwrite(response.response_body, 1, response.size, file);
+        fclose(file);
+    }
 }
 
 void RedMatrix_free(RedMatrix *self) {
