@@ -10,6 +10,8 @@ typedef struct {
   bool success;
   const char *error_message;
     char *response_body;
+  // response size
+  size_t size;
 } HttpClientResult;
 
 typedef struct {

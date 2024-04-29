@@ -96,6 +96,8 @@ HttpClientResult HttpClient_get(HttpClient *client, const char *path) {
   // Convert the cJSON object to a string (optional, depending on use case)
   char *json_string = cJSON_Print(json);
     result.response_body = json_string;
+    // set size to the size of the response 
+    result.size = strlen(json_string);
   // Clean up
   cJSON_Delete(json);
     free(response_body);
