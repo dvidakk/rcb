@@ -52,7 +52,7 @@ typedef struct {
     char *msgtype;
     char *body;
     char *com_reddit_blurred_url;
-    bool *com_reddit_nsfw_image;
+    bool com_reddit_nsfw_image;
     ChunkContentInfo *info;
     char *url;
     ContentRelatesTo *relates_to;
@@ -67,7 +67,7 @@ typedef struct {
     char *prev_sender;
     double prev_stream_pos;
     char *replaces_state;
-    bool *com_reddit_is_moderator;
+    bool com_reddit_is_moderator;
     char *redacted_by;
     struct MessageChunk *redacted_because;
 } ChunkUnsigned;
@@ -105,7 +105,7 @@ typedef struct {
     char *end;
     MessageChunkArray *chunk;
     char *updates;
-    MessageChunkArray *state;
+    MessageStateArray *state;
 } MessageResponse;
 
 // Function declarations

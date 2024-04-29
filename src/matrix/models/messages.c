@@ -63,6 +63,7 @@ ChunkContent *parseChunkContent(cJSON *content) {
 
     return chunkContent;
 }
+
 ChunkUnsigned *parseChunkUnsigned(cJSON *unsigned_chunk) {
     ChunkUnsigned *chunkUnsigned = malloc(sizeof(ChunkUnsigned));
 
@@ -98,6 +99,7 @@ ChunkUnsigned *parseChunkUnsigned(cJSON *unsigned_chunk) {
 
     return chunkUnsigned;
 }
+
 struct MessageChunk* parseSingleChunk(cJSON* message) {
     MessageChunk *messageChunk = malloc(sizeof(MessageChunk));
     //printf("Message: %s\n", cJSON_Print(message));
@@ -210,6 +212,8 @@ Relations *parseRelations(cJSON *relationsJson) {
 
     cJSON *hide_user_content = cJSON_GetObjectItem(relationsJson, "com.reddit.hide_user_content");
     relations->hide_user_content = hide_user_content ? parseRelationsHide(hide_user_content) : NULL;
+
+    return relations;
 }
 
 RelatesToInReplyTo *parseRelatesToInReplyTo(cJSON *in_reply_to) {
@@ -218,14 +222,15 @@ RelatesToInReplyTo *parseRelatesToInReplyTo(cJSON *in_reply_to) {
     relatesToInReplyTo->event_id = event_id ? event_id->valuestring : NULL;
     return relatesToInReplyTo;
 }
+
 ContentRelatesTo *parseContentRelatesTo(cJSON *relates_to) {
     ContentRelatesTo *contentRelatesTo = malloc(sizeof(ContentRelatesTo));
     cJSON *rel_type = cJSON_GetObjectItem(relates_to, "rel_type");
     contentRelatesTo->rel_type = rel_type ? rel_type->valuestring : NULL;
     cJSON *event_id = cJSON_GetObjectItem(relates_to, "event_id");
     contentRelatesTo->event_id = event_id ? event_id->valuestring : NULL;
-    cJSON *m_in_reply_to = parseRelatesToInReplyTo(cJSON_GetObjectItem(relates_to, "m.in_reply_to"));
-    contentRelatesTo->in_reply_to = m_in_reply_to;
+    cJSON *m_in_reply_to = cJSON_GetObjectItem(relates_to, "m.in_reply_to");
+    contentRelatesTo->in_reply_to = parseRelatesToInReplyTo(m_in_reply_to);
     cJSON *is_falling_back = cJSON_GetObjectItem(relates_to, "is_falling_back");
     contentRelatesTo->is_falling_back = is_falling_back ? is_falling_back->valueint : 0;
     cJSON *key = cJSON_GetObjectItem(relates_to, "key");
