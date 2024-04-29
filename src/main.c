@@ -11,6 +11,8 @@
 
 int main() {
 
+    char* r_croatia = "!GS8kU7qKTMydi5gBrShQtg:reddit.com";
+
     char* home = getenv("HOME");
     char path[256];
     snprintf(path, sizeof(path), "%s/dev/ingest/creds.ini", home);
@@ -24,13 +26,11 @@ int main() {
 
     Reddit_login(reddit);
     char* redditToken = Reddit_getToken(reddit);
-    printf("Reddit Token: %s\n", redditToken);
+    Reddit_WhoAmI(reddit);
 
     RedMatrix *matrix = RedMatrix_new(redditToken);
-
-    LoginResponse *response = RedMatrix_login(matrix);
-
-    MessageResponse *messages = RedMatrix_getRoomMessages(matrix, "!GS8kU7qKTMydi5gBrShQtg:reddit.com");
+    RedMatrix_login(matrix);    
+    MessageResponse *messages = RedMatrix_getRoomMessages(matrix, r_croatia);
 
     User **users = createUserTable(100);
     int user_count = 0;
