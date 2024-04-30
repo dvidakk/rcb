@@ -27,11 +27,7 @@ typedef struct {
 } RedMatrix;
 
 
-LoginResponse* LoginResponse_new(cJSON *access_token, 
-                                 cJSON *home_server, 
-                                 cJSON *user_id, 
-                                 cJSON *device_id, 
-                                 cJSON *storage_version);
+LoginResponse* LoginResponse_new(cJSON *logResponse);
 
 RedMatrix* RedMatrix_new(const char *redditToken);
 
@@ -39,7 +35,7 @@ void RedMatrix_login(RedMatrix *self);
 void RedMatrix_joinRoom(RedMatrix *self, const char *roomId);
 void RedMatrix_leaveRoom(RedMatrix *self, const char *roomId);
 void RedMatrix_getJoinedRooms(RedMatrix *self);
-MessageResponse* RedMatrix_getRoomMessages(RedMatrix *self, const char *roomId);
+MessageResponse* RedMatrix_getRoomMessages(RedMatrix *self, const char *roomId, const char *from_token);
 
 void RedMatrix_free(RedMatrix *self);
 

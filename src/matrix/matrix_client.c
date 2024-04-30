@@ -9,13 +9,22 @@
 #include "models/messages.h"
 
 
-LoginResponse* LoginResponse_new(cJSON *access_token, cJSON *home_server, cJSON *user_id, cJSON *device_id, cJSON *storage_version) {
+LoginResponse* LoginResponse_new(cJSON *logResponse) {
     LoginResponse *self = malloc(sizeof(LoginResponse));
-    self->access_token = access_token->valuestring;
-    self->home_server = home_server->valuestring;
-    self->user_id = user_id->valuestring;
-    self->device_id = device_id->valuestring;
-    self->storage_version = storage_version->valuestring;
+    cJSON *access_token = cJSON_GetObjectItem(logResponse, "access_token");
+    self->access_token = access_token ? access_token->valuestring : NULL;
+    
+    cJSON *home_server = cJSON_GetObjectItem(logResponse, "home_server");
+    self->home_server = home_server ? home_server->valuestring : NULL;
+
+    cJSON *user_id = cJSON_GetObjectItem(logResponse, "user_id");
+    self->user_id = user_id ? user_id->valuestring : NULL;
+
+    cJSON *device_id = cJSON_GetObjectItem(logResponse, "device_id");
+    self->device_id = device_id ? device_id->valuestring : NULL;
+
+    cJSON *storage_version = cJSON_GetObjectItem(logResponse, "com.reddit.storage_version");
+    self->storage_version = storage_version ? storage_version->valuestring : NULL;
     return self;
 }
 
@@ -54,17 +63,32 @@ void RedMatrix_login(RedMatrix *self) {
         printf("Error before: [%s]\n", cJSON_GetErrorPtr());
         return;
     }
-    LoginResponse *loginResponse = LoginResponse_new(cJSON_GetObjectItem(root, "access_token"), 
-                                                     cJSON_GetObjectItem(root, "home_server"), 
-                                                     cJSON_GetObjectItem(root, "user_id"), 
-                                                     cJSON_GetObjectItem(root, "device_id"), 
-                                                     cJSON_GetObjectItem(root, "com.reddit.storage_version"));
+    LoginResponse *loginResponse = LoginResponse_new(root);
     self->loginResponse = loginResponse;
-    // appends the access token like a bearer token
-    struct curl_slist *headers = NULL;
-    char bearer[256];
-    sprintf(bearer, "Authorization: Bearer %s", loginResponse->access_token);
+
+    struct curl_slist *headers = HttpClient_get_headers(self->http_client);
+
+    // Create the bearer token
+    char bearer[1024];
+    int ret = snprintf(bearer, sizeof(bearer), "Authorization: Bearer %s", loginResponse->access_token);
+
+    // Check if snprintf was successful
+    if (ret < 0 || ret >= sizeof(bearer)) {
+        if (ret < 0) {
+            fprintf(stderr, "Error in function %s: snprintf failed with return value %d\n", __func__, ret);
+        } else {
+            fprintf(stderr, "Error in function %s: snprintf output was truncated. Required %d bytes but only %lu were available in the buffer.\n", __func__, ret, sizeof(bearer));
+        }
+        return;
+    }
+    // Append the bearer token to the existing headers
     headers = curl_slist_append(headers, bearer);
+    if (headers == NULL) {
+        fprintf(stderr, "Error: curl_slist_append failed\n");
+        return;
+    }
+
+    // Set the headers
     HttpClient_set_headers(self->http_client, headers);
 
     cJSON_Delete(root); 
@@ -88,9 +112,13 @@ void RedMatrix_getJoinedRooms(RedMatrix *self) {
     cJSON_Delete(root);
 }
 
-MessageResponse* RedMatrix_getRoomMessages(RedMatrix *self, const char *room_id) {
+MessageResponse* RedMatrix_getRoomMessages(RedMatrix *self, const char *room_id, const char *from_token) {
     char path[256];
-    sprintf(path, "/_matrix/client/v3/rooms/%s/messages?dir=b&limit=100&filter=%s", room_id, curl_easy_escape(self->http_client->curl, "{\"lazy_load_members\":true}", 0));
+    if (from_token != NULL) {
+        sprintf(path, "/_matrix/client/v3/rooms/%s/messages?dir=b&limit=100&from=%s&filter=%s", room_id, from_token, curl_easy_escape(self->http_client->curl, "{\"lazy_load_members\":true}", 0));
+    } else {
+        sprintf(path, "/_matrix/client/v3/rooms/%s/messages?dir=b&limit=100&filter=%s", room_id, curl_easy_escape(self->http_client->curl, "{\"lazy_load_members\":true}", 0));
+    }
     HttpClientResult response = HttpClient_get(self->http_client, path);
     if (!response.success) {
         printf("Error: %s\n", response.error_message);
