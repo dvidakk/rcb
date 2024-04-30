@@ -7,6 +7,9 @@
 #include "http.h"
 
 size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
+  if (contents == NULL || userp == NULL) {
+    return 0; // signal error
+  }
   size_t total_size = size * nmemb;
   char **response_ptr = (char**)userp;
 
@@ -21,6 +24,11 @@ size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
 }
 
 HttpClient* HttpClient_new(const char *base_url, struct curl_slist *headers) {
+  if (base_url == NULL) {
+    fprintf(stderr, "Base URL is NULL\n");
+    return NULL;
+  }
+
   HttpClientResult result = {true, NULL};
 
   if(DEBUG) printf("Creating new HttpClient for URL: %s\n", base_url);
@@ -45,9 +53,25 @@ HttpClient* HttpClient_new(const char *base_url, struct curl_slist *headers) {
 }
 // Set the headers for the HttpClient
 void HttpClient_set_headers(HttpClient *client, struct curl_slist *headers) {
-    client->headers = headers;
+  if (client == NULL) {
+    fprintf(stderr, "HttpClient is NULL\n");
+    return;
+  }
+  client->headers = headers;
 }
+struct curl_slist* HttpClient_get_headers(HttpClient *client) {
+  if (client == NULL) {
+    fprintf(stderr, "HttpClient is NULL\n");
+    return NULL;
+  }
+  return client->headers;
+}
+
 HttpClientResult HttpClient_get(HttpClient *client, const char *path) {
+  if (client == NULL || path == NULL) {
+    HttpClientResult result = {false, "HttpClient or path is NULL"};
+    return result;
+  }
   HttpClientResult result = {true, NULL};
 
   if(DEBUG) printf("Performing GET request to path: %s\n", path);
@@ -106,11 +130,15 @@ HttpClientResult HttpClient_get(HttpClient *client, const char *path) {
 }
 
 HttpClientResult HttpClient_post(HttpClient *client, const char *path, const char *data) {
+  if (client == NULL || path == NULL || data == NULL) {
+    HttpClientResult result = {false, "HttpClient, path or data is NULL"};
+    return result;
+  }
   HttpClientResult result = {true, NULL};
-
+  
   if (DEBUG)  printf("Performing POST request to path: %s with data: %s\n", path, data);
 
-  char full_request_url[256];
+  char full_request_url[1024];
   snprintf(full_request_url, sizeof(full_request_url), "%s%s", client->base_url, path);
 
   curl_easy_setopt(client->curl, CURLOPT_URL, full_request_url);

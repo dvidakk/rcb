@@ -26,4 +26,5 @@ HttpClientResult HttpClient_get(HttpClient *client, const char *path);
 HttpClientResult HttpClient_post(HttpClient *client, const char *path, const char *data);
 void HttpClient_free(HttpClient *client);
 void HttpClient_set_headers(HttpClient *client, struct curl_slist *headers);
+struct curl_slist* HttpClient_get_headers(HttpClient *client);
 #endif // HTTP_H
