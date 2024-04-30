@@ -169,14 +169,18 @@ MessageStateArray *parseMessageState(cJSON *state) {
 MessageResponse *parseMessageResponse(char *response_body) {
     cJSON *root = cJSON_Parse(response_body);
     MessageResponse *messageResponse = malloc(sizeof(MessageResponse));
-    messageResponse->start = cJSON_GetObjectItem(root, "start")->valuestring;
-    messageResponse->start_stream = cJSON_GetObjectItem(root, "start_stream")->valuestring;
-    messageResponse->end = cJSON_GetObjectItem(root, "end")->valuestring;
+    cJSON *start = cJSON_GetObjectItem(root, "start");
+    messageResponse->start = start ? start->valuestring : NULL;
+    cJSON *start_stream = cJSON_GetObjectItem(root, "start_stream");
+    messageResponse->start_stream = start_stream ? start_stream->valuestring : NULL;
+    cJSON *end = cJSON_GetObjectItem(root, "end");
+    messageResponse->end = end ? end->valuestring : NULL;
     cJSON *chunk = cJSON_GetObjectItem(root, "chunk");
-    messageResponse->chunk = parseMessageChunk(chunk);
-    messageResponse->updates = cJSON_GetObjectItem(root, "updates")->valuestring;
+    messageResponse->chunk = chunk ? parseMessageChunk(chunk) : NULL;
+    cJSON *updates = cJSON_GetObjectItem(root, "updates");
+    messageResponse->updates = updates ? updates->valuestring : NULL;
     cJSON *state = cJSON_GetObjectItem(root, "state");
-    messageResponse->state = parseMessageState(state);
+    messageResponse->state = state ? parseMessageState(state) : NULL;
     return messageResponse;
 }
 
