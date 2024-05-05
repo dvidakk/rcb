@@ -15,6 +15,11 @@ typedef struct {
     int w;
 } ChunkContentInfo;
 
+typedef struct RelationsDisplaySettings {
+    double display_origin_server_ts;
+    bool distinguish_host;
+} RelationsDisplaySettings;
+
 typedef struct {
     char *event_id;
 } RelatesToInReplyTo;
@@ -42,6 +47,7 @@ typedef struct {
 typedef struct {
     Thread *thread;
     RelationsHide *hide_user_content;
+    RelationsDisplaySettings *display_settings;
 } Relations;
 
 // Complex structures
