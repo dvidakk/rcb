@@ -52,17 +52,14 @@ void RedMatrix_login(RedMatrix *self) {
 
     // Create the bearer token
     char bearer[1024];
-    int ret = snprintf(bearer, sizeof(bearer), "Authorization: Bearer %s", loginResponse->access_token);
+    size_t ret = snprintf(bearer, sizeof(bearer), "Authorization: Bearer %s", loginResponse->access_token);
 
     // Check if snprintf was successful
-    if (ret < 0 || ret >= sizeof(bearer)) {
-        if (ret < 0) {
-            fprintf(stderr, "Error in function %s: snprintf failed with return value %d\n", __func__, ret);
-        } else {
-            fprintf(stderr, "Error in function %s: snprintf output was truncated. Required %d bytes but only %lu were available in the buffer.\n", __func__, ret, sizeof(bearer));
-        }
+    if (ret >= sizeof(bearer)) {
+        fprintf(stderr, "Error in function %s: snprintf output was truncated. Required %zu bytes but only %zu were available in the buffer.\n", __func__, ret, sizeof(bearer));
         return;
     }
+    
     // Append the bearer token to the existing headers
     headers = curl_slist_append(headers, bearer);
     if (headers == NULL) {
@@ -112,13 +109,13 @@ MessageResponse* RedMatrix_getRoomMessages(RedMatrix *self, const char *room_id,
         printf("Error before: [%s]\n", cJSON_GetErrorPtr());
         return NULL;
     }
-//    if (root) {
-//      char *string = cJSON_Print(root);
-//      if (string) {
-//          printf("%s\n", string);
-//          free(string);
-//     }
-//    }
+   if (root) {
+     char *string = cJSON_Print(root);
+     if (string) {
+         printf("%s\n", string);
+         free(string);
+    }
+   }
     MessageResponse *messageResponse = parseMessageResponse(response.response_body);
 
     cJSON_Delete(root);
