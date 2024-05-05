@@ -3,3 +3,4 @@ bld/
 cmake-build-debug/
 response.txt
 src/reddit/models/
+*.txt
