@@ -8,7 +8,7 @@
 #define CONNECTION "Connection: keep-alive"
 
 #include <cJSON.h>
-#include "../http.h"
+#include "../utils/http.h"
 #include "models/messages.h"
 #include "models/login_response.h"
 
