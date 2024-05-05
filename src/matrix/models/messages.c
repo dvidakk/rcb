@@ -56,6 +56,18 @@ ChunkContent *parseChunkContent(cJSON *content) {
     cJSON *reason = cJSON_GetObjectItem(content, "reason");
     chunkContent->reason = reason ? reason->valuestring : NULL;
 
+    cJSON *attributes = cJSON_GetObjectItem(content, "attributes");
+    chunkContent->attributes = attributes ? parseMAttributes(attributes) : NULL;
+
+    cJSON *hide = cJSON_GetObjectItem(content, "hide");
+    chunkContent->hide = hide ? hide->valueint : 0;
+
+    cJSON *target_user_id = cJSON_GetObjectItem(content, "target_user_id");
+    chunkContent->target_user_id = target_user_id ? target_user_id->valuestring : NULL;
+
+    cJSON *collapse = cJSON_GetObjectItem(content, "collapse");
+    chunkContent->collapse = collapse ? collapse->valueint : 0;
+
     return chunkContent;
 }
 
@@ -223,6 +235,12 @@ Relations *parseRelations(cJSON *relationsJson) {
 
     cJSON *display_settings = cJSON_GetObjectItem(relationsJson, "com.reddit.display_settings");
     relations->display_settings = display_settings ? parseDisplaySettings(display_settings) : NULL;
+
+    cJSON *annotations = cJSON_GetObjectItem(relationsJson, "m.annotation");
+    relations->annotations = annotations ? parseRelationsAnotations(annotations) : NULL;
+
+    cJSON *potentially_toxic = cJSON_GetObjectItem(relationsJson, "com.reddit.potentially_toxic");
+    relations->com_reddit_potentially_toxic = potentially_toxic ? parseRelationsRedditPotentiallyToxic(potentially_toxic) : NULL;
     return relations;
 }
 
@@ -246,4 +264,35 @@ ContentRelatesTo *parseContentRelatesTo(cJSON *relates_to) {
     cJSON *key = cJSON_GetObjectItem(relates_to, "key");
     contentRelatesTo->key = key ? key->valuestring : NULL;
     return contentRelatesTo;
+}
+
+RelationsAnotations *parseRelationsAnotations(cJSON *annotations) {
+    RelationsAnotations *relationsAnotations = malloc(sizeof(RelationsAnotations));
+    cJSON *count = cJSON_GetObjectItem(annotations, "count");
+    relationsAnotations->count = count ? count->valueint : 0;
+    cJSON *key = cJSON_GetObjectItem(annotations, "key");
+    relationsAnotations->key = key ? key->valuestring : NULL;
+    cJSON *origin_server_ts = cJSON_GetObjectItem(annotations, "origin_server_ts");
+    relationsAnotations->origin_server_ts = origin_server_ts ? origin_server_ts->valuedouble : 0;
+    return relationsAnotations;
+}
+
+RelationsRedditPotentiallyToxic *parseRelationsRedditPotentiallyToxic(cJSON *potentially_toxic) {
+    RelationsRedditPotentiallyToxic *relationsRedditPotentiallyToxic = malloc(sizeof(RelationsRedditPotentiallyToxic));
+    cJSON *attributes = cJSON_GetObjectItem(potentially_toxic, "attributes");
+    relationsRedditPotentiallyToxic->attributes = attributes ? parseMAttributes(attributes) : NULL;
+    cJSON *collapse = cJSON_GetObjectItem(potentially_toxic, "collapse");
+    relationsRedditPotentiallyToxic->collapse = collapse ? collapse->valueint : 0;
+    cJSON *origin_server_ts = cJSON_GetObjectItem(potentially_toxic, "origin_server_ts");
+    relationsRedditPotentiallyToxic->origin_server_ts = origin_server_ts ? origin_server_ts->valuedouble : 0;
+    cJSON *reason = cJSON_GetObjectItem(potentially_toxic, "reason");
+    relationsRedditPotentiallyToxic->reason = reason ? reason->valuestring : NULL;
+    return relationsRedditPotentiallyToxic;
+}
+
+mAttributes *parseMAttributes(cJSON *attributes) {
+    mAttributes *mAttributes = malloc(sizeof(mAttributes));
+    cJSON *nsfw = cJSON_GetObjectItem(attributes, "nsfw");
+    mAttributes->nsfw = nsfw ? nsfw->valueint : 0;
+    return mAttributes;
 }

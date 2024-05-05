@@ -45,9 +45,38 @@ typedef struct {
 } RelationsHide;
 
 typedef struct {
+    int count;
+    char *key;
+    double origin_server_ts;
+} RelationsAnotations;
+/*"m.relations":	{
+					"com.reddit.potentially_toxic":	{
+						"attributes":	{
+							"nsfw":	true
+						},
+						"collapse":	true,
+						"origin_server_ts":	1714877982244,
+						"reason":	"perspective"
+					}
+				}
+}*/
+typedef struct {
+    bool nsfw;
+} mAttributes;
+
+typedef struct { 
+    mAttributes *attributes;
+    bool collapse;
+    double origin_server_ts;
+    char *reason;
+} RelationsRedditPotentiallyToxic;
+
+typedef struct {
     Thread *thread;
     RelationsHide *hide_user_content;
     RelationsDisplaySettings *display_settings;
+    RelationsAnotations *annotations;
+    RelationsRedditPotentiallyToxic *com_reddit_potentially_toxic;
 } Relations;
 
 // Complex structures
@@ -63,6 +92,10 @@ typedef struct {
     char *url;
     ContentRelatesTo *relates_to;
     char *reason;
+    mAttributes *attributes;
+    bool hide;
+    char *target_user_id;
+    bool collapse;
 } ChunkContent;
 
 typedef struct {
@@ -121,6 +154,9 @@ ChunkContent *parseChunkContent(cJSON *content);
 Thread *parseThread(cJSON *thread);
 struct MessageChunk *parseSingleChunk(cJSON *message);
 Relations *parseRelations(cJSON *relations);
+RelationsAnotations *parseRelationsAnotations(cJSON *annotations);
+RelationsRedditPotentiallyToxic *parseRelationsRedditPotentiallyToxic(cJSON *com_reddit_potentially_toxic);
+mAttributes *parseMAttributes(cJSON *attributes);
 ChunkUnsigned *parseChunkUnsigned(cJSON *unsigned_chunk);
 MessageChunkArray *parseMessageChunks(cJSON *message);
 MessageStateArray *parseMessageState(cJSON *state);
