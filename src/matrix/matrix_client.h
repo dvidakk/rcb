@@ -10,14 +10,7 @@
 #include <cJSON.h>
 #include "../http.h"
 #include "models/messages.h"
-
-typedef struct {
-    char *access_token;
-    char *home_server;
-    char *device_id;
-    char *user_id;
-    char *storage_version;
-} LoginResponse;
+#include "models/login_response.h"
 
 typedef struct {
     char *base_url;
