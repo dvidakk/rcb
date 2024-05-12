@@ -67,12 +67,9 @@ int main() {
         // sleep for 1 second to avoid rate limiting
         printf("\r%d/%d", i, depth);
         fflush(stdout);
-<<<<<<< HEAD
-        
-=======
+
         universal_sleep(1);
     // print the update with return carriage
->>>>>>> master
     }
     
     printDevider();
