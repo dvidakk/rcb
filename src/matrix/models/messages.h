@@ -161,6 +161,17 @@ ChunkUnsigned *parseChunkUnsigned(cJSON *unsigned_chunk);
 MessageChunkArray *parseMessageChunks(cJSON *message);
 MessageStateArray *parseMessageState(cJSON *state);
 MessageResponse *parseMessageResponse(char *response_body);
+
+void printChunkContentInfo(ChunkContentInfo *info);
+void printRelatesToInReplyTo(RelatesToInReplyTo *in_reply_to);
+void printContentRelatesTo(ContentRelatesTo *relates_to);
+void printChunkContent(ChunkContent *content);
+void printRelations(Relations *relations);
+void printThread(Thread *thread);
+void printChunkUnsigned(ChunkUnsigned *unsigned_chunk);
+void printMessageChunk(MessageChunkArray *chunk);
+void printSingleChunk(MessageChunk *chunk);
+void printMessageState(MessageState *state);
 void printMessageResponse(MessageResponse *messageResponse);
 
 #endif // MESSAGES_H

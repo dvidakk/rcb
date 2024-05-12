@@ -3,7 +3,13 @@
 #include <string.h>
 #include <stdbool.h>
 #include <time.h>
-#include <unistd.h>
+
+// include windows.h for sleep function
+#ifdef _WIN32
+    #include <windows.h>
+#else
+    #include <unistd.h>
+#endif
 
 #include "utils/ini_utils.h"
 #include "utils/test.h"
@@ -13,6 +19,15 @@
 
 #define USER_TABLE_SIZE 5000
 
+
+// handle sleep for windows and linux and mac
+void universal_sleep(int seconds) {
+    #ifdef _WIN32
+        Sleep(seconds * 1000);
+    #else
+        sleep(seconds);
+    #endif
+}
 
 int main() {
 
@@ -52,7 +67,12 @@ int main() {
         // sleep for 1 second to avoid rate limiting
         printf("\r%d/%d", i, depth);
         fflush(stdout);
-        sleep(1);
+<<<<<<< HEAD
+        
+=======
+        universal_sleep(1);
+    // print the update with return carriage
+>>>>>>> master
     }
     
     printDevider();
