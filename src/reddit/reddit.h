@@ -1,7 +1,7 @@
 #ifndef REDDIT_H
 #define REDDIT_H
 
-#include "../http.h"
+#include "../utils/http.h"
 
 typedef struct {
     char *access_token;

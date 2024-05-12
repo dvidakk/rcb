@@ -11,34 +11,14 @@
     #include <unistd.h>
 #endif
 
+#include "utils/ini_utils.h"
+#include "utils/test.h"
+
 #include "matrix/matrix_client.h"
 #include "reddit/reddit.h"
-#include "ini_utils.h"
-
-#include "test.h"
 
 #define USER_TABLE_SIZE 5000
 
-typedef struct {
-    MessageResponse **responses;
-    int size;
-} MessageResponseList;
-
-char* convertTimestampToLocaltime(double timestamp) {
-    time_t time_t_val = (time_t)timestamp;
-    struct tm *time_struct = localtime(&time_t_val);
-    char *time_str = malloc(sizeof(char) * 100);
-    strftime(time_str, 100, "%Y-%m-%d %H:%M:%S", time_struct);
-    return time_str;
-}
-
-void printDevider() {
-    printf("\n");
-    for (int i = 0; i < 100; i++) {
-        printf("-");
-    }
-    printf("\n");
-}
 
 // handle sleep for windows and linux and mac
 void universal_sleep(int seconds) {
@@ -68,8 +48,6 @@ int main() {
     char* redditToken = Reddit_getToken(reddit);
     Reddit_WhoAmI(reddit);
  
-    printDevider();
-
     RedMatrix *matrix = RedMatrix_new(redditToken);
     RedMatrix_login(matrix);    
 
@@ -80,7 +58,7 @@ int main() {
     response_list->responses = malloc(sizeof(MessageResponse) * USER_TABLE_SIZE);
     response_list->size = 0;
 
-    int depth = 50;
+    int depth = 1;
     for (int i=0; i < depth; i++) {
         MessageResponse *messages = RedMatrix_getRoomMessages(matrix, r_croatia, from_token);
         response_list->responses[response_list->size] = messages;
@@ -89,9 +67,16 @@ int main() {
         // sleep for 1 second to avoid rate limiting
         printf("\r%d/%d", i, depth);
         fflush(stdout);
+<<<<<<< HEAD
+        
+=======
         universal_sleep(1);
     // print the update with return carriage
+>>>>>>> master
     }
+    
+    printDevider();
+
     User **users = createUserTable(USER_TABLE_SIZE);
     int user_count = 0;
 

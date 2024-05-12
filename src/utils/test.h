@@ -6,6 +6,8 @@
 #include <string.h>
 #include <stdbool.h>
 
+#include "../matrix/models/messages.h"
+
 typedef struct User {
     char *user_id;
     char *displayname;
@@ -51,5 +53,27 @@ void freeUserTable(User **table, int size) {
     }
     free(table);
 }
+
+typedef struct {
+    MessageResponse **responses;
+    int size;
+} MessageResponseList;
+
+char* convertTimestampToLocaltime(double timestamp) {
+    time_t time_t_val = (time_t)timestamp;
+    struct tm *time_struct = localtime(&time_t_val);
+    char *time_str = malloc(sizeof(char) * 100);
+    strftime(time_str, 100, "%Y-%m-%d %H:%M:%S", time_struct);
+    return time_str;
+}
+
+void printDevider() {
+    printf("\n");
+    for (int i = 0; i < 100; i++) {
+        printf("-");
+    }
+    printf("\n");
+}
+
 
 #endif // TEST_H

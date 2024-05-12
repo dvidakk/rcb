@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../http.h"
+#include "../utils/http.h"
 
 #include "matrix_client.h"
 #include "models/messages.h"
@@ -50,7 +50,6 @@ void RedMatrix_login(RedMatrix *self) {
 
     struct curl_slist *headers = HttpClient_get_headers(self->http_client);
 
-    // Create the bearer token
     char bearer[1024];
     size_t ret = snprintf(bearer, sizeof(bearer), "Authorization: Bearer %s", loginResponse->access_token);
 
@@ -59,15 +58,13 @@ void RedMatrix_login(RedMatrix *self) {
         fprintf(stderr, "Error in function %s: snprintf output was truncated. Required %zu bytes but only %zu were available in the buffer.\n", __func__, ret, sizeof(bearer));
         return;
     }
-    
-    // Append the bearer token to the existing headers
+
     headers = curl_slist_append(headers, bearer);
     if (headers == NULL) {
         fprintf(stderr, "Error: curl_slist_append failed\n");
         return;
     }
 
-    // Set the headers
     HttpClient_set_headers(self->http_client, headers);
 
     cJSON_Delete(root); 
@@ -109,13 +106,13 @@ MessageResponse* RedMatrix_getRoomMessages(RedMatrix *self, const char *room_id,
         printf("Error before: [%s]\n", cJSON_GetErrorPtr());
         return NULL;
     }
-   if (root) {
-     char *string = cJSON_Print(root);
-     if (string) {
-         printf("%s\n", string);
-         free(string);
-    }
-   }
+//    if (root) {
+//      char *string = cJSON_Print(root);
+//      if (string) {
+//          printf("%s\n", string);
+//          free(string);
+//     }
+//    }
     MessageResponse *messageResponse = parseMessageResponse(response.response_body);
 
     cJSON_Delete(root);
