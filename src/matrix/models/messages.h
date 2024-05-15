@@ -49,17 +49,7 @@ typedef struct {
     char *key;
     double origin_server_ts;
 } RelationsAnotations;
-/*"m.relations":	{
-					"com.reddit.potentially_toxic":	{
-						"attributes":	{
-							"nsfw":	true
-						},
-						"collapse":	true,
-						"origin_server_ts":	1714877982244,
-						"reason":	"perspective"
-					}
-				}
-}*/
+
 typedef struct {
     bool nsfw;
 } mAttributes;

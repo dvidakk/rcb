@@ -25,7 +25,7 @@ RedMatrix* RedMatrix_new(const char *redditToken) {
     self->base_url = "https://matrix.redditspace.com";
     self->redditToken = redditToken;
     self->loginResponse = NULL;
-    
+
     struct curl_slist *headers = create_matrix_headers();
     self->http_client = HttpClient_new(self->base_url, headers);
     return self;
@@ -67,7 +67,7 @@ void RedMatrix_login(RedMatrix *self) {
 
     HttpClient_set_headers(self->http_client, headers);
 
-    cJSON_Delete(root); 
+    cJSON_Delete(root);
 }
 
 void RedMatrix_getJoinedRooms(RedMatrix *self) {
@@ -106,15 +106,15 @@ MessageOrJson* RedMatrix_getRoomMessages(RedMatrix *self, const char *room_id, c
         printf("Error before: [%s]\n", cJSON_GetErrorPtr());
         return NULL;
     }
-//    if (root) {
-//      char *string = cJSON_Print(root);
-//      if (string) {
-//          printf("%s\n", string);
-//          free(string);
-//     }
-//    }
-    MessageOrJson *messageOrJson = malloc(sizeof(MessageOrJson));
-    MessageResponse *messageResponse = parseMessageResponse(response.response_body);
+   if (root) {
+     char *string = cJSON_Print(root);
+     if (string) {
+        printf("%s\n", string);
+         free(string);
+    }
+   }
+   MessageOrJson *messageOrJson = malloc(sizeof(MessageOrJson));
+   MessageResponse *messageResponse = parseMessageResponse(response.response_body);
 
     if (json) {
         messageOrJson->json = root;
@@ -126,7 +126,7 @@ MessageOrJson* RedMatrix_getRoomMessages(RedMatrix *self, const char *room_id, c
     messageOrJson->response = messageResponse;
     messageOrJson->json = NULL;
     messageOrJson->from_token = messageResponse->end;
-    
+
     cJSON_Delete(root);
     return messageOrJson;
 }

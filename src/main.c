@@ -22,21 +22,21 @@ int main() {
     char* home = getenv("HOME");
     char path[256];
     snprintf(path, sizeof(path), "%s/dev/ingest/creds.ini", home);
-    
-    Creds* creds = parseIniFile(path);    
-    Reddit *reddit = Reddit_new(creds->client_id, 
-                                creds->client_secret, 
-                                creds->user, 
-                                creds->password, 
+
+    Creds* creds = parseIniFile(path);
+    Reddit *reddit = Reddit_new(creds->client_id,
+                                creds->client_secret,
+                                creds->user,
+                                creds->password,
                                 creds->user_agent);
 
     Reddit_login(reddit);
     char* redditToken = Reddit_getToken(reddit);
 
     Reddit_WhoAmI(reddit);
- 
+
     RedMatrix *matrix = RedMatrix_new(redditToken);
-    RedMatrix_login(matrix);    
+    RedMatrix_login(matrix);
 
     char *from_token = NULL;
     MessageResponseList *response_list = malloc(sizeof(MessageResponseList));
@@ -67,7 +67,7 @@ int main() {
         fflush(stdout);
         sleep(1);   // sleep for 1 second to avoid rate limiting
     }
-    
+
     printDevider();
 
     User **users = createUserTable(USER_TABLE_SIZE);
@@ -97,7 +97,7 @@ int main() {
             }
         }
     }
- 
+
     for (int i = response_list->size - 1; i >= 0; i--) {
         MessageResponse *messages = response_list->responses[i];
         for (int j = messages->chunk->size - 1; j >= 0; j--) {
