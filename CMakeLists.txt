@@ -1,47 +1,42 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.11)
 
 # Set the project name
 project(RedditChat)
 
-#find_package(CURL REQUIRED)
-find_package(Threads REQUIRED)
-#find_package(CJSON REQUIRED)
+#set(CMAKE_C_STANDARD 17)
 
-# Set the C standard to the newest version
-set(CMAKE_C_STANDARD 23)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic ")
-# source files in a src directory
-file(GLOB_RECURSE SOURCES "src/*.c")
-# Add the executable
-# add_library(RedditChat STATIC ${SOURCES})
-
+if(MSVC)
+    add_compile_options(/W4)
+else()
+    add_compile_options(-Wall -Wextra -pedantic)
+endif()
 
 # Add cJSON directory
 add_subdirectory(vendor/cJSON)
 add_subdirectory(vendor/curl)
 
-add_executable(RedditChat ${SOURCES})
-add_dependencies(RedditChat libcurl cjson)
+# source files in a src directory
+file(GLOB_RECURSE SOURCES "src/*.c")
 
-target_compile_options(RedditChat PRIVATE -Wall -Wextra -pedantic -static)
+add_executable(${CMAKE_PROJECT_NAME} ${SOURCES})
+add_dependencies(${CMAKE_PROJECT_NAME} libcurl cjson)
 
-set(BUILD_SHARED_LIBS OFF)
+target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE vendor/cJSON)
 
-# Set the option to not build cJSON tests
-set(CJSON_BuildTests OFF CACHE INTERNAL "")
-set(CJSON_BuildExample OFF CACHE INTERNAL "")
+if (WIN32)
+    set(CURL_LIBRARIES "${CMAKE_BINARY_DIR}/vendor/curl/lib/libcurl_object.dir/$<CONFIG>/libcurl_object.lib")
+    set(CJSON_LIBRARY "${CMAKE_BINARY_DIR}/vendor/cJSON/$<CONFIG>/cjson.lib")
+else()
+    set(CURL_LIBRARIES "${CMAKE_BINARY_DIR}/vendor/curl/lib/libcurl.so")
+    set(CJSON_LIBRARY "${CMAKE_BINARY_DIR}/vendor/cJSON/libcjson.so")
+endif()
 
-# Set the option to not build libcurl tests
-set(BUILD_TESTING OFF CACHE INTERNAL "")
-
-# Set the option to not build libcurl examples
-set(BUILD_CURL_EXE OFF CACHE INTERNAL "")
-
-target_include_directories(RedditChat PRIVATE vendor/cJSON)
-
-# # Set the path to the static cJSON and libcurl libraries
-set(CJSON_LIBRARY "${CMAKE_BINARY_DIR}/vendor/cJSON/libcjson.so")
-set(CURL_LIBRARY "${CMAKE_BINARY_DIR}/vendor/curl/lib/libcurl.so")
+if (WIN32)
+    add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_BINARY_DIR}/vendor/cJSON/$<CONFIG>/cjson.dll"
+        "$<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>")
+endif()
 
 # Link the library to the executable
-target_link_libraries(RedditChat PRIVATE ${CURL_LIBRARY} ${CJSON_LIBRARY} Threads::Threads)
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE ${CURL_LIBRARIES} ${CJSON_LIBRARY})

@@ -151,6 +151,7 @@ ChunkUnsigned *parseChunkUnsigned(cJSON *unsigned_chunk);
 MessageChunkArray *parseMessageChunks(cJSON *message);
 MessageStateArray *parseMessageState(cJSON *state);
 MessageResponse *parseMessageResponse(char *response_body);
-void printMessageResponse(MessageResponse *messageResponse);
+
+
 
 #endif // MESSAGES_H
