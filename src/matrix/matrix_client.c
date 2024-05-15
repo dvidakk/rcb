@@ -25,7 +25,7 @@ RedMatrix* RedMatrix_new(const char *redditToken) {
     self->base_url = "https://matrix.redditspace.com";
     self->redditToken = redditToken;
     self->loginResponse = NULL;
-    
+
     struct curl_slist *headers = create_matrix_headers();
     self->http_client = HttpClient_new(self->base_url, headers);
     return self;
@@ -67,7 +67,7 @@ void RedMatrix_login(RedMatrix *self) {
 
     HttpClient_set_headers(self->http_client, headers);
 
-    cJSON_Delete(root); 
+    cJSON_Delete(root);
 }
 
 void RedMatrix_getJoinedRooms(RedMatrix *self) {
@@ -88,7 +88,7 @@ void RedMatrix_getJoinedRooms(RedMatrix *self) {
     cJSON_Delete(root);
 }
 
-MessageResponse* RedMatrix_getRoomMessages(RedMatrix *self, const char *room_id, const char *from_token) {
+MessageOrJson* RedMatrix_getRoomMessages(RedMatrix *self, const char *room_id, const char *from_token, bool json) {
     char path[256];
     if (from_token != NULL) {
         sprintf(path, "/_matrix/client/v3/rooms/%s/messages?dir=b&limit=100&from=%s&filter=%s", room_id, from_token, curl_easy_escape(self->http_client->curl, "{\"lazy_load_members\":true}", 0));
@@ -106,17 +106,29 @@ MessageResponse* RedMatrix_getRoomMessages(RedMatrix *self, const char *room_id,
         printf("Error before: [%s]\n", cJSON_GetErrorPtr());
         return NULL;
     }
-//    if (root) {
-//      char *string = cJSON_Print(root);
-//      if (string) {
-//          printf("%s\n", string);
-//          free(string);
-//     }
-//    }
-    MessageResponse *messageResponse = parseMessageResponse(response.response_body);
+   if (root) {
+     char *string = cJSON_Print(root);
+     if (string) {
+        printf("%s\n", string);
+         free(string);
+    }
+   }
+   MessageOrJson *messageOrJson = malloc(sizeof(MessageOrJson));
+   MessageResponse *messageResponse = parseMessageResponse(response.response_body);
+
+    if (json) {
+        messageOrJson->json = root;
+        messageOrJson->response = NULL;
+        messageOrJson->from_token = messageResponse->end;
+        return messageOrJson;
+    }
+
+    messageOrJson->response = messageResponse;
+    messageOrJson->json = NULL;
+    messageOrJson->from_token = messageResponse->end;
 
     cJSON_Delete(root);
-    return messageResponse;
+    return messageOrJson;
 }
 
 // get displayname from user_id

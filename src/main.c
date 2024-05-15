@@ -30,26 +30,28 @@ void universal_sleep(int seconds) {
 }
 
 int main() {
+    int depth = 5;
 
     char* r_croatia = "!GS8kU7qKTMydi5gBrShQtg:reddit.com";
 
     char* home = getenv("HOME");
     char path[256];
     snprintf(path, sizeof(path), "%s/dev/ingest/creds.ini", home);
-    
-    Creds* creds = parseIniFile(path);    
-    Reddit *reddit = Reddit_new(creds->client_id, 
-                                creds->client_secret, 
-                                creds->user, 
-                                creds->password, 
+
+    Creds* creds = parseIniFile(path);
+    Reddit *reddit = Reddit_new(creds->client_id,
+                                creds->client_secret,
+                                creds->user,
+                                creds->password,
                                 creds->user_agent);
 
     Reddit_login(reddit);
     char* redditToken = Reddit_getToken(reddit);
+
     Reddit_WhoAmI(reddit);
- 
+
     RedMatrix *matrix = RedMatrix_new(redditToken);
-    RedMatrix_login(matrix);    
+    RedMatrix_login(matrix);
 
     char *from_token = NULL;
     MessageResponseList *response_list = malloc(sizeof(MessageResponseList));
@@ -58,20 +60,31 @@ int main() {
     response_list->responses = malloc(sizeof(MessageResponse) * USER_TABLE_SIZE);
     response_list->size = 0;
 
-    int depth = 1;
     for (int i=0; i < depth; i++) {
-        MessageResponse *messages = RedMatrix_getRoomMessages(matrix, r_croatia, from_token);
-        response_list->responses[response_list->size] = messages;
-        response_list->size++;
-        from_token = messages->end;
-        // sleep for 1 second to avoid rate limiting
+        MessageOrJson *messages = RedMatrix_getRoomMessages(matrix, r_croatia, from_token, false);
+        if (messages->response != NULL) {
+            response_list->responses[response_list->size] = messages->response;
+            response_list->size++;
+        }
+        if (messages->json != NULL) {
+            // print the json response
+            char *string = cJSON_Print(messages->json);
+            if (string) {
+                printf("%s\n", string);
+                free(string);
+            }
+
+
+        }
+        from_token = messages->from_token;
+
         printf("\r%d/%d", i, depth);
         fflush(stdout);
 
         universal_sleep(1);
-    // print the update with return carriage
+
     }
-    
+
     printDevider();
 
     User **users = createUserTable(USER_TABLE_SIZE);
@@ -102,27 +115,32 @@ int main() {
         }
     }
 
-for (int i = response_list->size - 1; i >= 0; i--) {
-    MessageResponse *messages = response_list->responses[i];
-    for (int j = messages->chunk->size - 1; j >= 0; j--) {
-        MessageChunk *message = messages->chunk->chunks[j];
-        ChunkContent *content = message->content;
-        char* displayname = getUserDisplayname(users, USER_TABLE_SIZE, message->sender);
+    for (int i = response_list->size - 1; i >= 0; i--) {
+        MessageResponse *messages = response_list->responses[i];
+        for (int j = messages->chunk->size - 1; j >= 0; j--) {
+            MessageChunk *message = messages->chunk->chunks[j];
+            ChunkContent *content = message->content;
+            char* displayname = getUserDisplayname(users, USER_TABLE_SIZE, message->sender);
 
-        if (content->body != NULL) {
-
-            if (content->msgtype != NULL && strcmp(content->msgtype, "m.image") == 0) {
-                printf("Image: %s - URL: %s - [%s] %s\n", content->body ? content->body : " ", content->url, content->msgtype, displayname ? displayname : message->sender);
-            } else {
-                printf("Message: %s - [%s] %s\n",  content->body, content->msgtype, displayname ? displayname : message->sender);
+            if (content->body != NULL) {
+                if (content->msgtype != NULL && strcmp(content->msgtype, "m.image") == 0) {
+                    printf("Image: %s - URL: %s - [%s] %s\n", content->body ? content->body : " ", content->url, content->msgtype, displayname ? displayname : message->sender);
+                } else {
+                    printf("Message: %s - [%s] %s\n",  content->body, content->msgtype, displayname ? displayname : message->sender);
+                }
+            } else if (strcmp(message->type, "m.room.member") == 0) {
+                printf("Member: %s - [%s]\n", strcmp(content->membership, "join") == 0 ? content->displayname : displayname, content->membership);
+            } else if (strcmp(message->type, "m.room.redaction") == 0) {
+                if (content->reason && content->reason[0] != '\0') {
+                    printf("Message: [Redacted] - [%s] - reason: %s %s\n", message->type, content->reason, displayname);
+                } else {
+                    printf("Message: [Redacted] - [%s] %s\n", message->type, displayname);
+                }
+            }else {
+                printf("Message: [Attachment] - [%s] %s\n", message->type, displayname);
             }
-        } else if (strcmp(message->type, "m.room.member") == 0) {
-            printf("Member: %s - [%s]\n", strcmp(content->membership, "join") == 0 ? content->displayname : displayname, content->membership);
-        } else {
-            printf("Message: [Attachment] - [%s] %s\n", message->type, displayname);
         }
     }
-}
     // print the date range of the messages
     double start = response_list->responses[0]->chunk->chunks[0]->origin_server_ts / 1000.0;
     double end = response_list->responses[response_list->size - 1]->chunk->chunks[response_list->responses[response_list->size - 1]->chunk->size - 1]->origin_server_ts / 1000.0;
@@ -136,9 +154,7 @@ for (int i = response_list->size - 1; i >= 0; i--) {
     char *end_time_str = convertTimestampToLocaltime(end);
     printf("End: %s\n", end_time_str);
     free(end_time_str);  // Don't forget to free the string when you're done with it
-    //RedMatrix_getDisplayName(matrix, "@t2_hltcflqh8:reddit.com");
-    //RedMatrix_getJoinedRooms(matrix);
-    
+
     freeUserTable(users, USER_TABLE_SIZE);
     Reddit_free(reddit);
     RedMatrix_free(matrix);
