@@ -6,6 +6,14 @@
 
 #include "http.h"
 
+void print_headers(struct curl_slist *headers) {
+    struct curl_slist *head = headers;
+    while (head != NULL) {
+        printf("%s\n", head->data);
+        head = head->next;
+    }
+}
+
 size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
   if (contents == NULL || userp == NULL) {
     return 0; // signal error
@@ -28,8 +36,6 @@ HttpClient* HttpClient_new(const char *base_url, struct curl_slist *headers) {
     fprintf(stderr, "Base URL is NULL\n");
     return NULL;
   }
-
-  HttpClientResult result = {true, NULL};
 
   if(DEBUG) printf("Creating new HttpClient for URL: %s\n", base_url);
 
@@ -69,10 +75,10 @@ struct curl_slist* HttpClient_get_headers(HttpClient *client) {
 
 HttpClientResult HttpClient_get(HttpClient *client, const char *path) {
   if (client == NULL || path == NULL) {
-    HttpClientResult result = {false, "HttpClient or path is NULL"};
+    HttpClientResult result = {false, "HttpClient or path is NULL", NULL, 0};   
     return result;
   }
-  HttpClientResult result = {true, NULL};
+  HttpClientResult result = {true, NULL, NULL, 0};
 
   if(DEBUG) printf("Performing GET request to path: %s\n", path);
 
@@ -82,8 +88,9 @@ HttpClientResult HttpClient_get(HttpClient *client, const char *path) {
   curl_easy_setopt(client->curl, CURLOPT_URL, full_request_url);
   curl_easy_setopt(client->curl, CURLOPT_HTTPGET, 1L);
   curl_easy_setopt(client->curl, CURLOPT_HTTPHEADER, client->headers);
-  if(DEBUG) printf("headers: %s\n", client->headers);
 
+  if(DEBUG) print_headers(client->headers);
+  
   char *response_body = (char*)malloc(1024); // Pre-allocate memory
   if (response_body == NULL) {
     result.success = false;
@@ -119,23 +126,25 @@ HttpClientResult HttpClient_get(HttpClient *client, const char *path) {
 
   // Convert the cJSON object to a string (optional, depending on use case)
   char *json_string = cJSON_Print(json);
-    result.response_body = json_string;
-    // set size to the size of the response 
-    result.size = strlen(json_string);
+  result.response_body = json_string;
+  
+  // set size to the size of the response 
+  result.size = strlen(json_string);
+  
   // Clean up
   cJSON_Delete(json);
-    free(response_body);
+  free(response_body);
 
-    return result;
+  return result;
 }
 
 HttpClientResult HttpClient_post(HttpClient *client, const char *path, const char *data) {
   if (client == NULL || path == NULL || data == NULL) {
-    HttpClientResult result = {false, "HttpClient, path or data is NULL"};
+    HttpClientResult result = {false, "HttpClient or path is NULL", NULL, 0};
     return result;
   }
-  HttpClientResult result = {true, NULL};
-  
+  HttpClientResult result = {true, NULL, NULL, 0};  
+
   if (DEBUG)  printf("Performing POST request to path: %s with data: %s\n", path, data);
 
   char full_request_url[1024];
@@ -145,7 +154,8 @@ HttpClientResult HttpClient_post(HttpClient *client, const char *path, const cha
   curl_easy_setopt(client->curl, CURLOPT_POST, 1L);
   curl_easy_setopt(client->curl, CURLOPT_POSTFIELDS, data);
   curl_easy_setopt(client->curl, CURLOPT_HTTPHEADER, client->headers);
-  if(DEBUG) printf("headers: %s\n", client->headers);
+
+  if(DEBUG) print_headers(client->headers);
 
   char *response_body = (char*)malloc(1024); // Pre-allocate memory
   if (response_body == NULL) {
