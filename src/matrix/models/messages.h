@@ -5,6 +5,10 @@
 #include <curl/curl.h>
 #include <cJSON.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct MessageChunk MessageChunk;
 
 // Basic structures
@@ -152,6 +156,8 @@ MessageChunkArray *parseMessageChunks(cJSON *message);
 MessageStateArray *parseMessageState(cJSON *state);
 MessageResponse *parseMessageResponse(char *response_body);
 
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif // MESSAGES_H

@@ -6,6 +6,10 @@
 #include <curl/curl.h>
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
   bool success;
   const char *error_message;
@@ -27,4 +31,9 @@ HttpClientResult HttpClient_post(HttpClient *client, const char *path, const cha
 void HttpClient_free(HttpClient *client);
 void HttpClient_set_headers(HttpClient *client, struct curl_slist *headers);
 struct curl_slist* HttpClient_get_headers(HttpClient *client);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif // HTTP_H

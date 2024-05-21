@@ -8,6 +8,10 @@
 
 #include "../matrix/models/messages.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct User {
     char *user_id;
     char *displayname;
@@ -75,5 +79,8 @@ void printDevider() {
     printf("\n");
 }
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif // TEST_H

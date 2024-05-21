@@ -12,6 +12,10 @@
 #include "models/messages.h"
 #include "models/login_response.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
     char *base_url;
     const char *redditToken;
@@ -34,5 +38,9 @@ void RedMatrix_free(RedMatrix *self);
 
 char* RedMatrix_getDisplayName(RedMatrix *self, const char *userId);
 void RedMatrix_downloadMxc(RedMatrix *self, const char *mxcUrl, const char *filename);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // MATRIX_CLIENT_H
