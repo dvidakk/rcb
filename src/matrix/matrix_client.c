@@ -113,7 +113,7 @@ MessageResponse* RedMatrix_getRoomMessages(RedMatrix *self, const char *room_id,
 //          free(string);
 //     }
 //    }
-    MessageResponse *messageResponse = parseMessageResponse(response.response_body);
+    MessageResponse *messageResponse = msg_parseMessageResponse(response.response_body);
 
     cJSON_Delete(root);
     return messageResponse;

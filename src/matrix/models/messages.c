@@ -112,7 +112,7 @@ struct MessageChunk* msg_parseSingleChunk(cJSON* message) {
     //printf("Message: %s\n", cJSON_Print(message));
 
     cJSON *content = cJSON_GetObjectItem(message, "content");
-    messageChunk->content = content ? parseChunkContent(content) : NULL;
+    messageChunk->content = content ? msg_parseChunkContent(content) : NULL;
 
     cJSON *event_id = cJSON_GetObjectItem(message, "event_id");
     messageChunk->event_id = event_id ? strdup(event_id->valuestring) : NULL;
@@ -258,7 +258,7 @@ ContentRelatesTo *msg_parseContentRelatesTo(cJSON *relates_to) {
     cJSON *event_id = cJSON_GetObjectItem(relates_to, "event_id");
     contentRelatesTo->event_id = event_id ? event_id->valuestring : NULL;
     cJSON *m_in_reply_to = cJSON_GetObjectItem(relates_to, "m.in_reply_to");
-    contentRelatesTo->in_reply_to = parseRelatesToInReplyTo(m_in_reply_to);
+    contentRelatesTo->in_reply_to = msg_parseRelatesToInReplyTo(m_in_reply_to);
     cJSON *is_falling_back = cJSON_GetObjectItem(relates_to, "is_falling_back");
     contentRelatesTo->is_falling_back = is_falling_back ? is_falling_back->valueint : 0;
     cJSON *key = cJSON_GetObjectItem(relates_to, "key");

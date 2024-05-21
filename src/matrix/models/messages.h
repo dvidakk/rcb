@@ -11,7 +11,6 @@ extern "C" {
 
 typedef struct MessageChunk MessageChunk;
 
-// Basic structures
 typedef struct {
     int h;
     char *mimetype;
@@ -73,7 +72,6 @@ typedef struct {
     RelationsRedditPotentiallyToxic *com_reddit_potentially_toxic;
 } Relations;
 
-// Complex structures
 typedef struct {
     char *membership;
     char *avatar_url;
@@ -117,7 +115,6 @@ typedef struct MessageChunk {
     char *redacts;
 } MessageChunk;
 
-
 typedef struct {
     MessageChunk *chunk;
 } MessageState;
@@ -155,6 +152,7 @@ ChunkUnsigned                   *msg_parseChunkUnsigned(cJSON *unsigned_chunk);
 MessageChunkArray               *msg_parseMessageChunks(cJSON *message);
 MessageStateArray               *msg_parseMessageState(cJSON *state);
 MessageResponse                 *msg_parseMessageResponse(char *response_body);
+
 #ifdef __cplusplus
 }
 #endif

@@ -23,9 +23,6 @@ typedef struct {
     HttpClient *http_client;
 } RedMatrix;
 
-
-LoginResponse* LoginResponse_new(cJSON *logResponse);
-
 RedMatrix* RedMatrix_new(const char *redditToken);
 
 void RedMatrix_login(RedMatrix *self);
