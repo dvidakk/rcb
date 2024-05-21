@@ -7,7 +7,7 @@
 
 #include "messages.h"
 
-ChunkContentInfo *parseChunkContentInfo(cJSON *info) {
+ChunkContentInfo *msg_parseChunkContentInfo(cJSON *info) {
     ChunkContentInfo *chunkContentInfo = malloc(sizeof(ChunkContentInfo));
     cJSON *h = cJSON_GetObjectItem(info, "h");
     chunkContentInfo->h = h ? h->valueint : 0;
@@ -20,7 +20,7 @@ ChunkContentInfo *parseChunkContentInfo(cJSON *info) {
     return chunkContentInfo;
 }
 
-ChunkContent *parseChunkContent(cJSON *content) {
+ChunkContent *msg_parseChunkContent(cJSON *content) {
     ChunkContent *chunkContent = malloc(sizeof(ChunkContent));
 
     cJSON *membership = cJSON_GetObjectItem(content, "membership");
@@ -45,19 +45,19 @@ ChunkContent *parseChunkContent(cJSON *content) {
     chunkContent->com_reddit_nsfw_image = com_reddit_nsfw_image ? com_reddit_nsfw_image->valueint : 0;
 
     cJSON *info = cJSON_GetObjectItem(content, "info");
-    chunkContent->info = info ? parseChunkContentInfo(info) : NULL;
+    chunkContent->info = info ? msg_parseChunkContentInfo(info) : NULL;
 
     cJSON *url = cJSON_GetObjectItem(content, "url");
     chunkContent->url = url ? url->valuestring : NULL;
 
     cJSON *relates_to = cJSON_GetObjectItem(content, "m.relates_to");
-    chunkContent->relates_to = relates_to ? parseContentRelatesTo(relates_to) : NULL;
+    chunkContent->relates_to = relates_to ? msg_parseContentRelatesTo(relates_to) : NULL;
 
     cJSON *reason = cJSON_GetObjectItem(content, "reason");
     chunkContent->reason = reason ? reason->valuestring : NULL;
 
     cJSON *attributes = cJSON_GetObjectItem(content, "attributes");
-    chunkContent->attributes = attributes ? parseMAttributes(attributes) : NULL;
+    chunkContent->attributes = attributes ? msg_parseMAttributes(attributes) : NULL;
 
     cJSON *hide = cJSON_GetObjectItem(content, "hide");
     chunkContent->hide = hide ? hide->valueint : 0;
@@ -71,7 +71,7 @@ ChunkContent *parseChunkContent(cJSON *content) {
     return chunkContent;
 }
 
-ChunkUnsigned *parseChunkUnsigned(cJSON *unsigned_chunk) {
+ChunkUnsigned *msg_parseChunkUnsigned(cJSON *unsigned_chunk) {
     ChunkUnsigned *chunkUnsigned = malloc(sizeof(ChunkUnsigned));
 
     cJSON *age = cJSON_GetObjectItem(unsigned_chunk, "age");
@@ -81,7 +81,7 @@ ChunkUnsigned *parseChunkUnsigned(cJSON *unsigned_chunk) {
     chunkUnsigned->com_reddit_subreddit_id = com_reddit_subreddit_id ? com_reddit_subreddit_id->valuestring : NULL;
 
     cJSON *prev_content = cJSON_GetObjectItem(unsigned_chunk, "prev_content");
-    chunkUnsigned->prev_content = prev_content ? parseChunkContent(prev_content) : NULL;
+    chunkUnsigned->prev_content = prev_content ? msg_parseChunkContent(prev_content) : NULL;
 
     cJSON *prev_sender = cJSON_GetObjectItem(unsigned_chunk, "prev_sender");
     chunkUnsigned->prev_sender = prev_sender ? prev_sender->valuestring : NULL;
@@ -93,7 +93,7 @@ ChunkUnsigned *parseChunkUnsigned(cJSON *unsigned_chunk) {
     chunkUnsigned->replaces_state = replaces_state ? replaces_state->valuestring : NULL;
 
     cJSON *relations = cJSON_GetObjectItem(unsigned_chunk, "m.relations");
-    chunkUnsigned->relations = relations ? parseRelations(relations) : NULL;
+    chunkUnsigned->relations = relations ? msg_parseRelations(relations) : NULL;
 
     cJSON *com_reddit_is_moderator = cJSON_GetObjectItem(unsigned_chunk, "com.reddit.is_moderator");
     chunkUnsigned->com_reddit_is_moderator = com_reddit_is_moderator ? com_reddit_is_moderator->valueint : 0;
@@ -102,12 +102,12 @@ ChunkUnsigned *parseChunkUnsigned(cJSON *unsigned_chunk) {
     chunkUnsigned->redacted_by = redacted_by ? redacted_by->valuestring : NULL;
 
     cJSON *redacted_because = cJSON_GetObjectItem(unsigned_chunk, "redacted_because");
-    chunkUnsigned->redacted_because = redacted_because ? parseSingleChunk(redacted_because) : NULL;
+    chunkUnsigned->redacted_because = redacted_because ? msg_parseSingleChunk(redacted_because) : NULL;
 
     return chunkUnsigned;
 }
 
-struct MessageChunk* parseSingleChunk(cJSON* message) {
+struct MessageChunk* msg_parseSingleChunk(cJSON* message) {
     MessageChunk *messageChunk = malloc(sizeof(MessageChunk));
     //printf("Message: %s\n", cJSON_Print(message));
 
@@ -133,7 +133,7 @@ struct MessageChunk* parseSingleChunk(cJSON* message) {
     messageChunk->type = type ? strdup(type->valuestring) : NULL;
 
     cJSON *unsigned_chunk = cJSON_GetObjectItem(message, "unsigned");
-    messageChunk->unsigned_chunk = unsigned_chunk ? parseChunkUnsigned(unsigned_chunk) : NULL;
+    messageChunk->unsigned_chunk = unsigned_chunk ? msg_parseChunkUnsigned(unsigned_chunk) : NULL;
 
     cJSON *redacts = cJSON_GetObjectItem(message, "redacts");
     messageChunk->redacts = redacts ? strdup(redacts->valuestring) : NULL;
@@ -141,13 +141,13 @@ struct MessageChunk* parseSingleChunk(cJSON* message) {
     return messageChunk;
 }
 
-MessageChunkArray* parseMessageChunk(cJSON* messages) {
+MessageChunkArray* msg_parseMessageChunk(cJSON* messages) {
     int size = cJSON_GetArraySize(messages);
     MessageChunk** messageChunks = malloc(size * sizeof(MessageChunk*));
 
     for (int i = 0; i < size; i++) {
         cJSON* message = cJSON_GetArrayItem(messages, i);
-        messageChunks[i] = parseSingleChunk(message);
+        messageChunks[i] = msg_parseSingleChunk(message);
     }
 
     MessageChunkArray* result = malloc(sizeof(MessageChunkArray));
@@ -157,13 +157,13 @@ MessageChunkArray* parseMessageChunk(cJSON* messages) {
     return result;
 }
 
-MessageStateArray *parseMessageState(cJSON *state) {
+MessageStateArray *msg_parseMessageState(cJSON *state) {
     int size = cJSON_GetArraySize(state);
     MessageChunk** messageStates = malloc(size * sizeof(MessageChunk*));
 
     for (int i = 0; i < size; i++) {
         cJSON* message = cJSON_GetArrayItem(state, i);
-        messageStates[i] = parseSingleChunk(message);
+        messageStates[i] = msg_parseSingleChunk(message);
     }
 
     MessageStateArray* result = malloc(sizeof(MessageStateArray));
@@ -173,7 +173,7 @@ MessageStateArray *parseMessageState(cJSON *state) {
     return result;
 }
 
-MessageResponse *parseMessageResponse(char *response_body) {
+MessageResponse *msg_parseMessageResponse(char *response_body) {
     cJSON *root = cJSON_Parse(response_body);
     MessageResponse *messageResponse = malloc(sizeof(MessageResponse));
     cJSON *start = cJSON_GetObjectItem(root, "start");
@@ -183,15 +183,15 @@ MessageResponse *parseMessageResponse(char *response_body) {
     cJSON *end = cJSON_GetObjectItem(root, "end");
     messageResponse->end = end ? end->valuestring : NULL;
     cJSON *chunk = cJSON_GetObjectItem(root, "chunk");
-    messageResponse->chunk = chunk ? parseMessageChunk(chunk) : NULL;
+    messageResponse->chunk = chunk ? msg_parseMessageChunk(chunk) : NULL;
     cJSON *updates = cJSON_GetObjectItem(root, "updates");
     messageResponse->updates = updates ? updates->valuestring : NULL;
     cJSON *state = cJSON_GetObjectItem(root, "state");
-    messageResponse->state = state ? parseMessageState(state) : NULL;
+    messageResponse->state = state ? msg_parseMessageState(state) : NULL;
     return messageResponse;
 }
 
-Thread *parseThread(cJSON *threadJson) {
+Thread *msg_parseThread(cJSON *threadJson) {
     Thread *thread = malloc(sizeof(Thread));
     cJSON *com_reddit_thread_heroes_user_ids = cJSON_GetObjectItem(threadJson, "com.reddit.thread_heroes_user_ids");
     int size = cJSON_GetArraySize(com_reddit_thread_heroes_user_ids);
@@ -204,18 +204,18 @@ Thread *parseThread(cJSON *threadJson) {
     cJSON *current_user_participated = cJSON_GetObjectItem(threadJson, "current_user_participated");
     thread->current_user_participated = current_user_participated ? current_user_participated->valueint : 0;
     cJSON *latest_event = cJSON_GetObjectItem(threadJson, "latest_event");
-    thread->latest_event = latest_event ? parseSingleChunk(latest_event) : NULL;
+    thread->latest_event = latest_event ? msg_parseSingleChunk(latest_event) : NULL;
     return thread;
 }
 
-RelationsHide* parseRelationsHide(cJSON *hide) {
+RelationsHide* msg_parseRelationsHide(cJSON *hide) {
     RelationsHide *relationsHide = malloc(sizeof(RelationsHide));
     cJSON *hideItem = cJSON_GetObjectItem(hide, "hide");
     relationsHide->hide = hideItem ? hideItem->valueint : 0;
     return relationsHide;
 }
 
-RelationsDisplaySettings *parseDisplaySettings(cJSON *display_settings) {
+RelationsDisplaySettings *msg_parseDisplaySettings(cJSON *display_settings) {
     RelationsDisplaySettings *displaySettings = malloc(sizeof(RelationsDisplaySettings));
     cJSON *display_origin_server_ts = cJSON_GetObjectItem(display_settings, "display_origin_server_ts");
     displaySettings->display_origin_server_ts = display_origin_server_ts ? display_origin_server_ts->valuedouble : 0;
@@ -224,34 +224,34 @@ RelationsDisplaySettings *parseDisplaySettings(cJSON *display_settings) {
     return displaySettings;
 }
 
-Relations *parseRelations(cJSON *relationsJson) {
+Relations *msg_parseRelations(cJSON *relationsJson) {
     Relations *relations = malloc(sizeof(Relations));
 
     cJSON *thread = cJSON_GetObjectItem(relationsJson, "m.thread");
-    relations->thread = thread ? parseThread(thread) : NULL;
+    relations->thread = thread ? msg_parseThread(thread) : NULL;
 
     cJSON *hide_user_content = cJSON_GetObjectItem(relationsJson, "com.reddit.hide_user_content");
-    relations->hide_user_content = hide_user_content ? parseRelationsHide(hide_user_content) : NULL;
+    relations->hide_user_content = hide_user_content ? msg_parseRelationsHide(hide_user_content) : NULL;
 
     cJSON *display_settings = cJSON_GetObjectItem(relationsJson, "com.reddit.display_settings");
-    relations->display_settings = display_settings ? parseDisplaySettings(display_settings) : NULL;
+    relations->display_settings = display_settings ? msg_parseDisplaySettings(display_settings) : NULL;
 
     cJSON *annotations = cJSON_GetObjectItem(relationsJson, "m.annotation");
-    relations->annotations = annotations ? parseRelationsAnotations(annotations) : NULL;
+    relations->annotations = annotations ? msg_parseRelationsAnotations(annotations) : NULL;
 
     cJSON *potentially_toxic = cJSON_GetObjectItem(relationsJson, "com.reddit.potentially_toxic");
-    relations->com_reddit_potentially_toxic = potentially_toxic ? parseRelationsRedditPotentiallyToxic(potentially_toxic) : NULL;
+    relations->com_reddit_potentially_toxic = potentially_toxic ? msg_parseRelationsRedditPotentiallyToxic(potentially_toxic) : NULL;
     return relations;
 }
 
-RelatesToInReplyTo *parseRelatesToInReplyTo(cJSON *in_reply_to) {
+RelatesToInReplyTo *msg_parseRelatesToInReplyTo(cJSON *in_reply_to) {
     RelatesToInReplyTo *relatesToInReplyTo = malloc(sizeof(RelatesToInReplyTo));
     cJSON *event_id = cJSON_GetObjectItem(in_reply_to, "event_id");
     relatesToInReplyTo->event_id = event_id ? event_id->valuestring : NULL;
     return relatesToInReplyTo;
 }
 
-ContentRelatesTo *parseContentRelatesTo(cJSON *relates_to) {
+ContentRelatesTo *msg_parseContentRelatesTo(cJSON *relates_to) {
     ContentRelatesTo *contentRelatesTo = malloc(sizeof(ContentRelatesTo));
     cJSON *rel_type = cJSON_GetObjectItem(relates_to, "rel_type");
     contentRelatesTo->rel_type = rel_type ? rel_type->valuestring : NULL;
@@ -266,7 +266,7 @@ ContentRelatesTo *parseContentRelatesTo(cJSON *relates_to) {
     return contentRelatesTo;
 }
 
-RelationsAnotations *parseRelationsAnotations(cJSON *annotations) {
+RelationsAnotations *msg_parseRelationsAnotations(cJSON *annotations) {
     RelationsAnotations *relationsAnotations = malloc(sizeof(RelationsAnotations));
     cJSON *count = cJSON_GetObjectItem(annotations, "count");
     relationsAnotations->count = count ? count->valueint : 0;
@@ -277,10 +277,10 @@ RelationsAnotations *parseRelationsAnotations(cJSON *annotations) {
     return relationsAnotations;
 }
 
-RelationsRedditPotentiallyToxic *parseRelationsRedditPotentiallyToxic(cJSON *potentially_toxic) {
+RelationsRedditPotentiallyToxic *msg_parseRelationsRedditPotentiallyToxic(cJSON *potentially_toxic) {
     RelationsRedditPotentiallyToxic *relationsRedditPotentiallyToxic = malloc(sizeof(RelationsRedditPotentiallyToxic));
     cJSON *attributes = cJSON_GetObjectItem(potentially_toxic, "attributes");
-    relationsRedditPotentiallyToxic->attributes = attributes ? parseMAttributes(attributes) : NULL;
+    relationsRedditPotentiallyToxic->attributes = attributes ? msg_parseMAttributes(attributes) : NULL;
     cJSON *collapse = cJSON_GetObjectItem(potentially_toxic, "collapse");
     relationsRedditPotentiallyToxic->collapse = collapse ? collapse->valueint : 0;
     cJSON *origin_server_ts = cJSON_GetObjectItem(potentially_toxic, "origin_server_ts");
@@ -290,7 +290,7 @@ RelationsRedditPotentiallyToxic *parseRelationsRedditPotentiallyToxic(cJSON *pot
     return relationsRedditPotentiallyToxic;
 }
 
-mAttributes *parseMAttributes(cJSON *attributes) {
+mAttributes *msg_parseMAttributes(cJSON *attributes) {
     mAttributes *mAttributes = malloc(sizeof(mAttributes));
     cJSON *nsfw = cJSON_GetObjectItem(attributes, "nsfw");
     mAttributes->nsfw = nsfw ? nsfw->valueint : 0;

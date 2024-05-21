@@ -142,20 +142,19 @@ typedef struct {
 } MessageResponse;
 
 // Function declarations
-ChunkContentInfo *parseChunkContentInfo(cJSON *info);
-ContentRelatesTo *parseContentRelatesTo(cJSON *relates_to);
-ChunkContent *parseChunkContent(cJSON *content);
-Thread *parseThread(cJSON *thread);
-struct MessageChunk *parseSingleChunk(cJSON *message);
-Relations *parseRelations(cJSON *relations);
-RelationsAnotations *parseRelationsAnotations(cJSON *annotations);
-RelationsRedditPotentiallyToxic *parseRelationsRedditPotentiallyToxic(cJSON *com_reddit_potentially_toxic);
-mAttributes *parseMAttributes(cJSON *attributes);
-ChunkUnsigned *parseChunkUnsigned(cJSON *unsigned_chunk);
-MessageChunkArray *parseMessageChunks(cJSON *message);
-MessageStateArray *parseMessageState(cJSON *state);
-MessageResponse *parseMessageResponse(char *response_body);
-
+ChunkContentInfo                *msg_parseChunkContentInfo(cJSON *info);
+ContentRelatesTo                *msg_parseContentRelatesTo(cJSON *relates_to);
+ChunkContent                    *msg_parseChunkContent(cJSON *content);
+Thread                          *msg_parseThread(cJSON *thread);
+struct MessageChunk             *msg_parseSingleChunk(cJSON *message);
+Relations                       *msg_parseRelations(cJSON *relations);
+RelationsAnotations             *msg_parseRelationsAnotations(cJSON *annotations);
+RelationsRedditPotentiallyToxic *msg_parseRelationsRedditPotentiallyToxic(cJSON *com_reddit_potentially_toxic);
+mAttributes                     *msg_parseMAttributes(cJSON *attributes);
+ChunkUnsigned                   *msg_parseChunkUnsigned(cJSON *unsigned_chunk);
+MessageChunkArray               *msg_parseMessageChunks(cJSON *message);
+MessageStateArray               *msg_parseMessageState(cJSON *state);
+MessageResponse                 *msg_parseMessageResponse(char *response_body);
 #ifdef __cplusplus
 }
 #endif
