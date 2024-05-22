@@ -5,7 +5,8 @@
 
 #include <cJSON.h>
 
-#include "messages.h"
+#include "matrix/models/messages.h"
+#include "utils/win_utils.h"    
 
 ChunkContentInfo *msg_parseChunkContentInfo(cJSON *info) {
     ChunkContentInfo *chunkContentInfo = malloc(sizeof(ChunkContentInfo));

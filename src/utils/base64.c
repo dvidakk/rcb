@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "base64.h"
+#include "utils/base64.h"
 
 char* base64_encode(const char* data) {
 

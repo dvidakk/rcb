@@ -4,8 +4,9 @@
 #include <curl/curl.h>
 #include <cJSON.h>
 
-#include "reddit.h"
-#include "base64.h"
+#include "reddit/reddit.h"
+#include "utils/base64.h"
+#include "utils/win_utils.h"
 
 Reddit* Reddit_new(const char *clientId, const char *clientSecret, const char *username, const char *password, const char *user_agent){
     Reddit *self = malloc(sizeof(Reddit));
@@ -146,5 +147,6 @@ void Reddit_free(Reddit *self) {
         safe_free(self->token->scope);
         free(self->token);
     }
+	HttpClient_free(self->http_client);
     free(self);
 }

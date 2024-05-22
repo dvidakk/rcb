@@ -66,7 +66,7 @@ typedef struct {
 char* convertTimestampToLocaltime(double timestamp) {
     time_t time_t_val = (time_t)timestamp;
     struct tm *time_struct = localtime(&time_t_val);
-    char *time_str = malloc(sizeof(char) * 100);
+    char *time_str = (char*)malloc(sizeof(char) * 100);
     strftime(time_str, 100, "%Y-%m-%d %H:%M:%S", time_struct);
     return time_str;
 }

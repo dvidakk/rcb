@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <cJSON.h>
 
-#include "login_response.h"
+#include "matrix/models/login_response.h"
 
 
 LoginResponse* LoginResponse_new(cJSON *logResponse) {
