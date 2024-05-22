@@ -43,13 +43,12 @@ else()
     set(CJSON_LIBRARY  "${PROJECT_BINARY_DIR}/vendor/cJSON/libcjson.a")
 endif() 
 
-# if(NOT CMAKE_BUILD_TYPE MATCHES Debug)
-#     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_STRIP} $<TARGET_FILE:${PROJECT_NAME}>)
-# endif()
-
 # Link the library to the executable
 target_include_directories(${PROJECT_NAME} PUBLIC include)
 if(UNIX)
+    if(NOT CMAKE_BUILD_TYPE MATCHES Debug)
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_STRIP} $<TARGET_FILE:${PROJECT_NAME}>)
+    endif()
     target_link_libraries(${PROJECT_NAME} PRIVATE ${CURL_LIBRARIES} ${CJSON_LIBRARY} OpenSSL::SSL OpenSSL::Crypto ZLIB::ZLIB)
 else()
     target_link_libraries(${PROJECT_NAME} PRIVATE ${CURL_LIBRARIES} ${CJSON_LIBRARY})
