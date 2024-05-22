@@ -1,5 +1,5 @@
+:warning: **WORK IN PROGRESS**: This is currently a work in progress and may not have full functionality. :warning:
 # rcb
-:warning: **WORK IN PROGRESS**: This is currently a work in progress and may not have full functionality.
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
