@@ -5,6 +5,7 @@
 #include <cJSON.h>
 
 #include "utils/http.h"
+#include "utils/safe_func.h"
 
 size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
   if (contents == NULL || userp == NULL) {
@@ -19,7 +20,8 @@ size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
   if (*response_ptr == NULL)
     return 0; // signal error
 
-  strncat(*response_ptr, (const char*)contents, total_size);
+  //strncat(*response_ptr, (const char*)contents, total_size);
+  safe_strncat(response_ptr, (const char*)contents, new_size);
   return total_size;
 }
 
@@ -29,7 +31,7 @@ HttpClient* HttpClient_new(const char *base_url, struct curl_slist *headers) {
     return NULL;
   }
 
-  HttpClientResult result = {true, NULL};
+  // HttpClientResult result = {true, NULL};
 
   if(DEBUG) printf("Creating new HttpClient for URL: %s\n", base_url);
 
@@ -82,7 +84,13 @@ HttpClientResult HttpClient_get(HttpClient *client, const char *path) {
   curl_easy_setopt(client->curl, CURLOPT_URL, full_request_url);
   curl_easy_setopt(client->curl, CURLOPT_HTTPGET, 1L);
   curl_easy_setopt(client->curl, CURLOPT_HTTPHEADER, client->headers);
-  if(DEBUG) printf("headers: %s\n", client->headers);
+  if(DEBUG) {
+    struct curl_slist *header = client->headers;
+    while (header != NULL) {
+        printf("%s\n", header->data);
+        header = header->next;
+    }
+  }
 
   char *response_body = (char*)malloc(1024); // Pre-allocate memory
   if (response_body == NULL) {
@@ -145,7 +153,13 @@ HttpClientResult HttpClient_post(HttpClient *client, const char *path, const cha
   curl_easy_setopt(client->curl, CURLOPT_POST, 1L);
   curl_easy_setopt(client->curl, CURLOPT_POSTFIELDS, data);
   curl_easy_setopt(client->curl, CURLOPT_HTTPHEADER, client->headers);
-  if(DEBUG) printf("headers: %s\n", client->headers);
+  if(DEBUG) {
+    struct curl_slist *header = client->headers;
+    while (header != NULL) {
+        printf("%s\n", header->data);
+        header = header->next;
+    }
+  }
 
   char *response_body = (char*)malloc(1024); // Pre-allocate memory
   if (response_body == NULL) {

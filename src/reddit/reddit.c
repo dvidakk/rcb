@@ -55,7 +55,7 @@ void Reddit_login(Reddit *self) {
 
     char data[1024];
     char user_agent[1024];
-    sprintf(data, "grant_type=password&username=%s&password=%s", self->username, self->password);
+    snprintf(data, sizeof(data), "grant_type=password&username=%s&password=%s", self->username, self->password);
 
     snprintf(user_agent, sizeof(user_agent), "User-Agent: %s", self->user_agent);
     struct curl_slist *headers = create_headers(user_agent, self->clientId, self->clientSecret);

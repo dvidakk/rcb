@@ -33,8 +33,8 @@ RedMatrix* RedMatrix_new(const char *redditToken) {
 
 void RedMatrix_login(RedMatrix *self) {
     char data[1024];
-    sprintf(data, "{\"token\": \"%s\", \"device_id\": \"DO_NOT_TRACK_THIS_DEVICE\", \"initial_device_display_name\": \"Reddit Web Client\", \"type\": \"com.reddit.token\"}", self->redditToken);
-
+    snprintf(data, sizeof(data), "{\"token\": \"%s\", \"device_id\": \"DO_NOT_TRACK_THIS_DEVICE\", \"initial_device_display_name\": \"Reddit Web Client\", \"type\": \"com.reddit.token\"}", self->redditToken);
+    
     HttpClientResult response = HttpClient_post(self->http_client, "/_matrix/client/v3/login", data);
     if (!response.success) {
         printf("Error: %s\n", response.error_message);
@@ -91,9 +91,9 @@ void RedMatrix_getJoinedRooms(RedMatrix *self) {
 MessageResponse* RedMatrix_getRoomMessages(RedMatrix *self, const char *room_id, const char *from_token) {
     char path[256];
     if (from_token != NULL) {
-        sprintf(path, "/_matrix/client/v3/rooms/%s/messages?dir=b&limit=100&from=%s&filter=%s", room_id, from_token, curl_easy_escape(self->http_client->curl, "{\"lazy_load_members\":true}", 0));
+        snprintf(path, sizeof(path), "/_matrix/client/v3/rooms/%s/messages?dir=b&limit=100&from=%s&filter=%s", room_id, from_token, curl_easy_escape(self->http_client->curl, "{\"lazy_load_members\":true}", 0));    
     } else {
-        sprintf(path, "/_matrix/client/v3/rooms/%s/messages?dir=b&limit=100&filter=%s", room_id, curl_easy_escape(self->http_client->curl, "{\"lazy_load_members\":true}", 0));
+        snprintf(path, sizeof(path), "/_matrix/client/v3/rooms/%s/messages?dir=b&limit=100&filter=%s", room_id, curl_easy_escape(self->http_client->curl, "{\"lazy_load_members\":true}", 0));
     }
     HttpClientResult response = HttpClient_get(self->http_client, path);
     if (!response.success) {
@@ -122,7 +122,7 @@ MessageResponse* RedMatrix_getRoomMessages(RedMatrix *self, const char *room_id,
 // get displayname from user_id
 char* RedMatrix_getDisplayName(RedMatrix *self, const char *user_id) {
     char path[256];
-    sprintf(path, "/_matrix/client/v3/profile/%s/displayname", user_id);
+    snprintf(path, sizeof(path), "/_matrix/client/v3/profile/%s/displayname", user_id);
     HttpClientResult response = HttpClient_get(self->http_client, path);
     if (!response.success) {
         printf("Error: %s\n", response.error_message);
@@ -141,7 +141,7 @@ char* RedMatrix_getDisplayName(RedMatrix *self, const char *user_id) {
 }
 void RedMatrix_joinRoom(RedMatrix *self, const char *room_id) {
     char path[256];
-    sprintf(path, "/_matrix/client/v3/rooms/%s/join", room_id);
+    snprintf(path, sizeof(path), "/_matrix/client/v3/rooms/%s/join", room_id);
     HttpClientResult response = HttpClient_post(self->http_client, path, "{}");
     if (!response.success) {
         printf("Error: %s\n", response.error_message);
@@ -157,7 +157,7 @@ void RedMatrix_joinRoom(RedMatrix *self, const char *room_id) {
 
 void RedMatrix_leaveRoom(RedMatrix *self, const char *room_id) {
     char path[256];
-    sprintf(path, "/_matrix/client/v3/rooms/%s/leave", room_id);
+    snprintf(path, sizeof(path), "/_matrix/client/v3/rooms/%s/leave", room_id);
     HttpClientResult response = HttpClient_post(self->http_client, path, "{}");
     if (!response.success) {
         printf("Error: %s\n", response.error_message);
@@ -174,7 +174,7 @@ void RedMatrix_leaveRoom(RedMatrix *self, const char *room_id) {
 
 void RedMatrix_downloadMxc(RedMatrix *self, const char *mxc_url, const char *filename) {
     char path[256];
-    sprintf(path, "/_matrix/media/v3/download/%s", mxc_url);
+    snprintf(path, sizeof(path), "/_matrix/media/v3/download/%s", mxc_url);
     printf("Downloading: %s\n", path);
     HttpClientResult response = HttpClient_get(self->http_client, path);
     if (!response.success) {

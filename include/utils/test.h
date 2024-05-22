@@ -65,9 +65,14 @@ typedef struct {
 
 char* convertTimestampToLocaltime(double timestamp) {
     time_t time_t_val = (time_t)timestamp;
-    struct tm *time_struct = localtime(&time_t_val);
+    struct tm time_struct;
+    #ifdef _WIN32
+        localtime_s(&time_struct, &time_t_val);
+    #else
+        localtime_r(&time_t_val, &time_struct);
+    #endif
     char *time_str = (char*)malloc(sizeof(char) * 100);
-    strftime(time_str, 100, "%Y-%m-%d %H:%M:%S", time_struct);
+    strftime(time_str, 100, "%Y-%m-%d %H:%M:%S", &time_struct);
     return time_str;
 }
 
