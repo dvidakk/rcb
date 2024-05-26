@@ -8,10 +8,10 @@
 #include "matrix/models/login_response.h"
 
 #define CONTENT_TYPE "Content-Type: application/json"
-#define USER_AGENT "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:123.0) Gecko/20100101 Firefox/123.0"
-#define ORIGIN "Origin: https://chat.reddit.com"
-#define ACCEPT "Accept: application/json"
-#define CONNECTION "Connection: keep-alive"
+#define USER_AGENT   "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:123.0) Gecko/20100101 Firefox/123.0"
+#define ORIGIN       "Origin: https://chat.reddit.com"
+#define ACCEPT       "Accept: application/json"
+#define CONNECTION   "Connection: keep-alive"
 
 
 #ifdef __cplusplus

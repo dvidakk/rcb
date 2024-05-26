@@ -10,7 +10,7 @@
 #include "matrix/models/messages.h"
 #include "matrix/models/login_response.h"
 
-struct curl_slist* create_matrix_headers() {
+struct curl_slist* create_matrix_headers(void) {
     struct curl_slist *headers = NULL;
     headers = curl_slist_append(headers, CONTENT_TYPE);
     headers = curl_slist_append(headers, USER_AGENT);
@@ -106,13 +106,13 @@ MessageResponse* RedMatrix_getRoomMessages(RedMatrix *self, const char *room_id,
         printf("Error before: [%s]\n", cJSON_GetErrorPtr());
         return NULL;
     }
-//    if (root) {
-//      char *string = cJSON_Print(root);
-//      if (string) {
-//          printf("%s\n", string);
-//          free(string);
-//     }
-//    }
+    if (root) {
+      char *string = cJSON_Print(root);
+      if (string) {
+          printf("%s\n", string);
+          free(string);
+     }
+    }
     MessageResponse *messageResponse = msg_parseMessageResponse(response.response_body);
 
     cJSON_Delete(root);

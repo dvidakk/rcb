@@ -29,7 +29,7 @@ void universal_sleep(int seconds) {
     #endif
 }
 
-int main() {
+int main(void) {
 
     char* r_croatia = "!GS8kU7qKTMydi5gBrShQtg:reddit.com";
 

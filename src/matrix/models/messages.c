@@ -69,6 +69,45 @@ ChunkContent *msg_parseChunkContent(cJSON *content) {
     cJSON *collapse = cJSON_GetObjectItem(content, "collapse");
     chunkContent->collapse = collapse ? collapse->valueint : 0;
 
+    cJSON *canonical = cJSON_GetObjectItem(content, "canonical");
+    chunkContent->canonical = canonical ? canonical->valueint : 0;
+
+    cJSON *channel_id = cJSON_GetObjectItem(content, "channel_id");
+    chunkContent->channel_id = channel_id ? channel_id->valuestring : NULL;
+
+    cJSON *icon = cJSON_GetObjectItem(content, "icon");
+    chunkContent->icon = icon ? icon->valuestring : NULL;
+
+    cJSON *is_restricted = cJSON_GetObjectItem(content, "is_restricted");
+    chunkContent->is_restricted = is_restricted ? is_restricted->valueint : 0;
+
+    cJSON *permalink = cJSON_GetObjectItem(content, "permalink");
+    chunkContent->permalink = permalink ? permalink->valuestring : NULL;
+
+    cJSON *subreddit_id = cJSON_GetObjectItem(content, "subreddit_id");
+    chunkContent->subreddit_id = subreddit_id ? subreddit_id->valuestring : NULL;
+
+    cJSON *subreddit_name = cJSON_GetObjectItem(content, "subreddit_name");
+    chunkContent->subreddit_name = subreddit_name ? subreddit_name->valuestring : NULL;
+
+    cJSON *subreddit_permission_level = cJSON_GetObjectItem(content, "subreddit_permission_level");
+    chunkContent->subreddit_permission_level = subreddit_permission_level ? subreddit_permission_level->valuestring : NULL;
+
+    cJSON *subreddit_type = cJSON_GetObjectItem(content, "subreddit_type");
+    chunkContent->subreddit_type = subreddit_type ? subreddit_type->valuestring : NULL;
+
+    cJSON *via = cJSON_GetObjectItem(content, "via");
+    if (via) {
+        int size = cJSON_GetArraySize(via);
+        chunkContent->via = malloc(size * sizeof(char *));
+        for (int i = 0; i < size; i++) {
+            cJSON *viaItem = cJSON_GetArrayItem(via, i);
+            chunkContent->via[i] = viaItem->valuestring;
+        }
+    } else {
+        chunkContent->via = NULL;
+    }
+
     return chunkContent;
 }
 

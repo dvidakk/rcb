@@ -71,7 +71,17 @@ typedef struct {
     RelationsAnotations *annotations;
     RelationsRedditPotentiallyToxic *com_reddit_potentially_toxic;
 } Relations;
-
+/*new data to add 
+			"canonical":	true,
+				"channel_id":	"c2_2bb",
+				"icon":	"https://styles.redditmedia.com/t5_2qyps/styles/communityIcon_zfsiaahhpo9c1.jpg",
+				"is_restricted":	false,
+				"permalink":	"https://reddit.com/r/croatia/channel/2bb/general",
+				"subreddit_id":	"t5_2qyps",
+				"subreddit_name":	"croatia",
+				"subreddit_permission_level":	"low",
+				"subreddit_type":	"public",
+				"via":	["reddit.com"]*/
 typedef struct {
     char *membership;
     char *avatar_url;
@@ -88,6 +98,16 @@ typedef struct {
     bool hide;
     char *target_user_id;
     bool collapse;
+    bool canonical;
+    char *channel_id;
+    char *icon;
+    bool is_restricted;
+    char *permalink;
+    char *subreddit_id; 
+    char *subreddit_name;
+    char *subreddit_permission_level;
+    char *subreddit_type;
+    char **via;
 } ChunkContent;
 
 typedef struct {

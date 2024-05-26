@@ -76,7 +76,7 @@ char* convertTimestampToLocaltime(double timestamp) {
     return time_str;
 }
 
-void printDevider() {
+void printDevider(void) {
     printf("\n");
     for (int i = 0; i < 100; i++) {
         printf("-");

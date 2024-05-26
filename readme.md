@@ -17,6 +17,7 @@ You need to have the following installed:
 - C compiler (GCC, Clang, etc.)
 - CMake
 - libcurl
+- [cxxopts](https://github.com/jarro2783/cxxopts)
 
 ### Building
 1. Clone the repository:

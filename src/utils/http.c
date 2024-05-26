@@ -31,8 +31,6 @@ HttpClient* HttpClient_new(const char *base_url, struct curl_slist *headers) {
     return NULL;
   }
 
-  // HttpClientResult result = {true, NULL};
-
   if(DEBUG) printf("Creating new HttpClient for URL: %s\n", base_url);
 
   HttpClient *client = (HttpClient*)malloc(sizeof(HttpClient));
@@ -71,10 +69,10 @@ struct curl_slist* HttpClient_get_headers(HttpClient *client) {
 
 HttpClientResult HttpClient_get(HttpClient *client, const char *path) {
   if (client == NULL || path == NULL) {
-    HttpClientResult result = {false, "HttpClient or path is NULL"};
+    HttpClientResult result = {false, "HttpClient or path is NULL", NULL, 0};
     return result;
   }
-  HttpClientResult result = {true, NULL};
+  HttpClientResult result = {true, NULL, NULL, 0};
 
   if(DEBUG) printf("Performing GET request to path: %s\n", path);
 
@@ -139,10 +137,10 @@ HttpClientResult HttpClient_get(HttpClient *client, const char *path) {
 
 HttpClientResult HttpClient_post(HttpClient *client, const char *path, const char *data) {
   if (client == NULL || path == NULL || data == NULL) {
-    HttpClientResult result = {false, "HttpClient, path or data is NULL"};
+    HttpClientResult result = {false, "HttpClient, path or data is NULL", NULL, 0};
     return result;
   }
-  HttpClientResult result = {true, NULL};
+  HttpClientResult result = {true, NULL, NULL, 0};
   
   if (DEBUG)  printf("Performing POST request to path: %s with data: %s\n", path, data);
 
