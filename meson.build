@@ -3,7 +3,6 @@ project('RedditChat', 'c',
   default_options: ['c_std=c17', 'warning_level=3']
 )
 
-# Compiler options
 cc = meson.get_compiler('c')
 if cc.get_id() == 'msvc'
   add_project_arguments('/W4', language: 'c')
@@ -11,12 +10,14 @@ else
   add_project_arguments('-Wpedantic', language: 'c')
 endif
 
+# find python3
+python3 = find_program('python3')
 
+cjson_proj = subproject('cjson')
+cjson_dep = cjson_proj.get_variable('libcjson_dep')
 
-# Add cJSON dependency
-curl_dep = subproject('curl').get_variable('curl_dep')
-cjson_dep = subproject('cjson').get_variable('libcjson_dep')
-
+curl_proj = subproject('curl')
+curl_dep = curl_proj.get_variable('curl_dep')
 
 # Source files
 matrix_src = files(
@@ -42,18 +43,19 @@ sources = [
 # Include directories
 inc_dirs = include_directories('include')
 
-# Executable
 executable_name = 'RedditChat'
 executable = executable(executable_name, sources,
   dependencies: [curl_dep, cjson_dep],
   include_directories: inc_dirs
 )
 
-# Platform-specific settings
+# Platform-specific settings for Windows
 if host_machine.system() == 'windows'
-  # Post-build command to copy DLL (if needed)
-  # meson.add_install_script('copy_dll.py', 
-  #   meson.current_build_dir() / 'subprojects/cjson/cjson.dll',
-  #   meson.current_build_dir() / executable_name
-  # )
+  cjson_dll = join_paths(meson.build_root(), 'subprojects', 'cJSON-1.7.18', 'cjson-1.dll')
+  curl_dll = join_paths(meson.build_root(), 'subprojects', 'curl-8.10.0', 'lib', 'curl-4.dll')
+
+  copy_dll_script = join_paths(meson.source_root(), 'scripts', 'copy_dll.py')
+
+  meson.add_postconf_script('python3', copy_dll_script, cjson_dll, meson.current_build_dir())
+  meson.add_postconf_script('python3', copy_dll_script, curl_dll, meson.current_build_dir())
 endif
