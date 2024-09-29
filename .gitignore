@@ -4,3 +4,13 @@ cmake-build-debug/
 response.txt
 src/reddit/models/
 *.txt
+builddir/
+
+# Ignore everything in subprojects
+subprojects/*
+
+# Allow .wrap files only in the subprojects directory (not in subdirectories)
+!subprojects/*.wrap
+
+# Ignore everything in subdirectories of subprojects
+subprojects/*/

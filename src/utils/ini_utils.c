@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ini_utils.h"
+#include "utils/ini_utils.h"
 
 Creds* parseIniFile(char* filename)
 {

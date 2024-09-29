@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <time.h>
+#include <locale.h>
 
 // include windows.h for sleep function
 #ifdef _WIN32
@@ -13,12 +14,12 @@
 
 #include "utils/ini_utils.h"
 #include "utils/test.h"
+#include "utils/rb_tree.h"
 
 #include "matrix/matrix_client.h"
 #include "reddit/reddit.h"
 
 #define USER_TABLE_SIZE 5000
-
 
 // handle sleep for windows and linux and mac
 void universal_sleep(int seconds) {
@@ -58,7 +59,7 @@ int main() {
     response_list->responses = malloc(sizeof(MessageResponse) * USER_TABLE_SIZE);
     response_list->size = 0;
 
-    int depth = 1;
+    int depth = 5;
     for (int i=0; i < depth; i++) {
         MessageResponse *messages = RedMatrix_getRoomMessages(matrix, r_croatia, from_token);
         response_list->responses[response_list->size] = messages;
@@ -74,29 +75,30 @@ int main() {
     
     printDevider();
 
-    User **users = createUserTable(USER_TABLE_SIZE);
+    // User **users = createUserTable(USER_TABLE_SIZE);
+    RBTree* users = createRBTree();
     int user_count = 0;
 
-    for (int i = 0; i < response_list->size; i++){
+// Process messages and build user table
+    for (int i = 0; i < response_list->size; i++) {
         MessageResponse *messages = response_list->responses[i];
         for (int j = 0; j < messages->state->size; j++) {
             MessageChunk *message_chunk = messages->state->chunks[j];
             ChunkContent *content = message_chunk->content;
-            char *displayname = NULL;
-
-            if (strcmp(message_chunk->type, "m.room.member") == 0 && getUserDisplayname(users, USER_TABLE_SIZE, message_chunk->sender) == NULL) {
-                if(strcmp(content->membership, "join") == 0) {
+            
+            if (strcmp(message_chunk->type, "m.room.member") == 0 && 
+                getUserDisplayname(users, message_chunk->sender) == NULL) {
+                char *displayname = NULL;
+                if (strcmp(content->membership, "join") == 0) {
                     displayname = content->displayname;
-                } else if (strcmp(content->membership, "leave") == 0) {
-                    // get the displayname from the previous content in the unsigned chunk
-                    if (message_chunk->unsigned_chunk && message_chunk->unsigned_chunk->prev_content) {
-                        displayname = message_chunk->unsigned_chunk->prev_content->displayname;
-                    }
+                } else if (strcmp(content->membership, "leave") == 0 && 
+                           message_chunk->unsigned_chunk && 
+                           message_chunk->unsigned_chunk->prev_content) {
+                    displayname = message_chunk->unsigned_chunk->prev_content->displayname;
                 }
-
+                
                 if (displayname != NULL) {
-                    insertUser(users, USER_TABLE_SIZE, message_chunk->sender, displayname);
-                    user_count++;
+                    insertUser(users, message_chunk->sender, displayname);
                 }
             }
         }
@@ -107,7 +109,7 @@ for (int i = response_list->size - 1; i >= 0; i--) {
     for (int j = messages->chunk->size - 1; j >= 0; j--) {
         MessageChunk *message = messages->chunk->chunks[j];
         ChunkContent *content = message->content;
-        char* displayname = getUserDisplayname(users, USER_TABLE_SIZE, message->sender);
+        char* displayname = getUserDisplayname(users, message->sender); // Corrected function call
 
         if (content->body != NULL) {
 
@@ -139,7 +141,7 @@ for (int i = response_list->size - 1; i >= 0; i--) {
     //RedMatrix_getDisplayName(matrix, "@t2_hltcflqh8:reddit.com");
     //RedMatrix_getJoinedRooms(matrix);
     
-    freeUserTable(users, USER_TABLE_SIZE);
+    freeRBTree(users);
     Reddit_free(reddit);
     RedMatrix_free(matrix);
     return 0;

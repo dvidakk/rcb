@@ -3,11 +3,14 @@
 
 #include <stdbool.h>
 #include <curl/curl.h>
-#include <cJSON.h>
+#include <cjson/cJSON.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct MessageChunk MessageChunk;
 
-// Basic structures
 typedef struct {
     int h;
     char *mimetype;
@@ -69,7 +72,6 @@ typedef struct {
     RelationsRedditPotentiallyToxic *com_reddit_potentially_toxic;
 } Relations;
 
-// Complex structures
 typedef struct {
     char *membership;
     char *avatar_url;
@@ -86,6 +88,16 @@ typedef struct {
     bool hide;
     char *target_user_id;
     bool collapse;
+    bool canonical;
+    char *channel_id;
+    char *icon;
+    bool is_restricted;
+    char *permalink;
+    char *subreddit_id; 
+    char *subreddit_name;
+    char *subreddit_permission_level;
+    char *subreddit_type;
+    char **via;
 } ChunkContent;
 
 typedef struct {
@@ -113,7 +125,6 @@ typedef struct MessageChunk {
     char *redacts;
 } MessageChunk;
 
-
 typedef struct {
     MessageChunk *chunk;
 } MessageState;
@@ -138,20 +149,22 @@ typedef struct {
 } MessageResponse;
 
 // Function declarations
-ChunkContentInfo *parseChunkContentInfo(cJSON *info);
-ContentRelatesTo *parseContentRelatesTo(cJSON *relates_to);
-ChunkContent *parseChunkContent(cJSON *content);
-Thread *parseThread(cJSON *thread);
-struct MessageChunk *parseSingleChunk(cJSON *message);
-Relations *parseRelations(cJSON *relations);
-RelationsAnotations *parseRelationsAnotations(cJSON *annotations);
-RelationsRedditPotentiallyToxic *parseRelationsRedditPotentiallyToxic(cJSON *com_reddit_potentially_toxic);
-mAttributes *parseMAttributes(cJSON *attributes);
-ChunkUnsigned *parseChunkUnsigned(cJSON *unsigned_chunk);
-MessageChunkArray *parseMessageChunks(cJSON *message);
-MessageStateArray *parseMessageState(cJSON *state);
-MessageResponse *parseMessageResponse(char *response_body);
+ChunkContentInfo                *msg_parseChunkContentInfo(cJSON *info);
+ContentRelatesTo                *msg_parseContentRelatesTo(cJSON *relates_to);
+ChunkContent                    *msg_parseChunkContent(cJSON *content);
+Thread                          *msg_parseThread(cJSON *thread);
+struct MessageChunk             *msg_parseSingleChunk(cJSON *message);
+Relations                       *msg_parseRelations(cJSON *relations);
+RelationsAnotations             *msg_parseRelationsAnotations(cJSON *annotations);
+RelationsRedditPotentiallyToxic *msg_parseRelationsRedditPotentiallyToxic(cJSON *com_reddit_potentially_toxic);
+mAttributes                     *msg_parseMAttributes(cJSON *attributes);
+ChunkUnsigned                   *msg_parseChunkUnsigned(cJSON *unsigned_chunk);
+MessageChunkArray               *msg_parseMessageChunks(cJSON *message);
+MessageStateArray               *msg_parseMessageState(cJSON *state);
+MessageResponse                 *msg_parseMessageResponse(char *response_body);
 
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif // MESSAGES_H

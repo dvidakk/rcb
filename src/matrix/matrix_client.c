@@ -1,14 +1,14 @@
-#include <cJSON.h>
+#include <cjson/cJSON.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
-#include "../utils/http.h"
+#include "utils/http.h"
 
-#include "matrix_client.h"
-#include "models/messages.h"
-#include "models/login_response.h"
+#include "matrix/matrix_client.h"
+#include "matrix/models/messages.h"
+#include "matrix/models/login_response.h"
 
 struct curl_slist* create_matrix_headers() {
     struct curl_slist *headers = NULL;
@@ -113,7 +113,7 @@ MessageResponse* RedMatrix_getRoomMessages(RedMatrix *self, const char *room_id,
 //          free(string);
 //     }
 //    }
-    MessageResponse *messageResponse = parseMessageResponse(response.response_body);
+    MessageResponse *messageResponse = msg_parseMessageResponse(response.response_body);
 
     cJSON_Delete(root);
     return messageResponse;

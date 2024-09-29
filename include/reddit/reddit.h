@@ -3,6 +3,10 @@
 
 #include "../utils/http.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
     char *access_token;
     char *refresh_token;
@@ -28,5 +32,9 @@ void Reddit_WhoAmI(Reddit *self);
 char* Reddit_getToken(Reddit *self);
 
 void Reddit_free(Reddit *self);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // REDDIT_H

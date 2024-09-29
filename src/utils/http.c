@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <curl/curl.h>
 #include <string.h>
-#include <cJSON.h>
+#include <cjson/cJSON.h>
 
-#include "http.h"
+#include "utils/http.h"
 
 size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
   if (contents == NULL || userp == NULL) {

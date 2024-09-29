@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <curl/curl.h>
-#include <cJSON.h>
+#include <cjson/cJSON.h>
 
-#include "reddit.h"
-#include "base64.h"
+#include "reddit/reddit.h"
+#include "utils/base64.h"
 
 Reddit* Reddit_new(const char *clientId, const char *clientSecret, const char *username, const char *password, const char *user_agent){
     Reddit *self = malloc(sizeof(Reddit));
